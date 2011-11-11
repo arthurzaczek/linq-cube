@@ -1,0 +1,4 @@
+
+*.suo
+/LinqCube/obj
+/LinqCube/bin
