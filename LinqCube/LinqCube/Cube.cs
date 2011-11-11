@@ -26,14 +26,14 @@ namespace dasz.LinqCube
 
             foreach (var query in queries)
             {
-                result.Add(query.Result);
+                result[query] = query.Result;
             }
 
             return result;
         }
     }
 
-    public class CubeResult : List<QueryResult>
+    public class CubeResult : Dictionary<IQuery, QueryResult>
     {
         public CubeResult()
         {

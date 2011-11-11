@@ -5,14 +5,23 @@ using System.Text;
 
 namespace dasz.LinqCube
 {
-    public class Query<TFact>
+    public interface IQuery
     {
-        internal List<IQueryDimension> QueryDimensions { get; private set; }
-        public List<IMeasure> Measures { get; private set; }
+        string Name { get; }
+        QueryResult Result { get; }
+    }
+
+    public class Query<TFact> : IQuery
+    {
+        public string Name { get; private set; }
         public QueryResult Result { get; private set; }
 
-        public Query()
+        internal List<IQueryDimension> QueryDimensions { get; private set; }
+        public List<IMeasure> Measures { get; private set; }
+
+        public Query(string name)
         {
+            Name = name;
             QueryDimensions = new List<IQueryDimension>();
             Measures = new List<IMeasure>();
         }

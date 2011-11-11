@@ -33,22 +33,29 @@ namespace dasz.LinqCube.Example
 
             var sumSalary = new DecimalSumMeasure<Person>("Sum of Salaries", k => k.Salary);
 
+            var genderAgeQuery = new Query<Person>("gender over birthday")
+                                    .WithDimension(time)
+                                    .WithDimension(gender)
+                                    .WithMeasure(countAll);
+
+            var salaryQuery = new Query<Person>("salary over gender and date of employment")
+                                    .WithDimension(time_empstart)
+                                    .WithDimension(gender)
+                                    .WithDimension(salary)
+                                    .WithMeasure(countAll)
+                                    .WithMeasure(sumSalary);
+
+            var employmentCountQuery = new Query<Person>("count by date of employment")
+                                    .WithDimension(time_empstart)
+                                    .WithMeasure(countAll);
+
             CubeResult result;
             using (var ctx = new Repository())
             {
                 result = Cube.Execute(ctx.Persons,
-                                new Query<Person>()
-                                    .WithDimension(time)
-                                    .WithDimension(gender)
-                                    .WithMeasure(countAll),
-                                new Query<Person>()
-                                    .WithDimension(time_empstart)
-                                    .WithDimension(gender)
-                                    .WithDimension(salary)
-                                    .WithMeasure(countAll),
-                                new Query<Person>()
-                                    .WithDimension(time_empstart)
-                                    .WithMeasure(countAll)
+                                genderAgeQuery,
+                                salaryQuery,
+                                employmentCountQuery
                 );
             }
 
@@ -63,8 +70,8 @@ namespace dasz.LinqCube.Example
                         Console.WriteLine("{0}: {1,12}, M: {2,3} W: {3,3}",
                             salary.Name,
                             gPart2.Label,
-                            result[1][year][gPart2][gender]["M"][countAll],
-                            result[1][year][gPart2][gender]["F"][countAll]);
+                            result[salaryQuery][year][gPart2][gender]["M"][countAll],
+                            result[salaryQuery][year][gPart2][gender]["F"][countAll]);
                     }
                 }
                 Console.WriteLine();
