@@ -10,14 +10,16 @@ namespace dasz.LinqCube
         public static Query<TFact> WithDimension<TDimension, TFact>(this Query<TFact> q, Dimension<TDimension, TFact> dim)
             where TDimension : IComparable
         {
-            if (q.Dimensions.FirstOrDefault(i => i.Dimension == (IDimension)dim) != null) throw new InvalidOperationException("Dimension already added");
-            q.Dimensions.Add(new QueryDimension<TDimension, TFact>(dim));
+            if (q.QueryDimensions.FirstOrDefault(i => i.Dimension == (IDimension)dim) != null) throw new InvalidOperationException("Dimension already added");
+            q.QueryDimensions.Add(new QueryDimension<TDimension, TFact>(dim));
             return q;
         }
 
-        public static Query<TFact> Count<TDimension, TFact>(this Query<TFact> q, Func<TFact, TDimension> selector)
-            where TDimension : IComparable
+        public static Query<TFact> WithMeasure<TIntermediate, TFact>(this Query<TFact> q, Measure<TFact, TIntermediate> measure)
         {
+            if (q.Measures.Contains(measure))
+                throw new InvalidOperationException("Measure already added");
+            q.Measures.Add(measure);
             return q;
         }
     }

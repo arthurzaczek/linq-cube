@@ -23,7 +23,7 @@ namespace dasz.LinqCube
     public interface IDimensionResult
     {
         DimensionResultEntriesDictionary Entries { get; }
-        DimensionResultOtherDimensionsDictionary Dimensions { get; }
+        DimensionResultOtherDimensionsDictionary OtherDimensions { get; }
 
         IDimensionResult this[IDimension key] { get; }
         IDimensionEntryResult this[IDimensionEntry key] { get; }
@@ -32,27 +32,29 @@ namespace dasz.LinqCube
 
     public interface IDimensionEntryResult : IDimensionResult
     {
-        int Value { get; set; }
+        MeasureResultDictionary Values { get; }
     }
 
     public class DimensionResult<TFact> : IDimensionResult
     {
-        public DimensionResult(IQueryDimension dim)
+        public DimensionResult(IQueryDimension dim, IEnumerable<IMeasure> measures)
         {
             QueryDimension = dim;
             Entries = new DimensionResultEntriesDictionary();
-            Dimensions = new DimensionResultOtherDimensionsDictionary();
+            OtherDimensions = new DimensionResultOtherDimensionsDictionary();
+            Measures = measures;
         }
 
         public IQueryDimension QueryDimension { get; private set; }
         public DimensionResultEntriesDictionary Entries { get; private set; }
-        public DimensionResultOtherDimensionsDictionary Dimensions { get; private set; }
+        public DimensionResultOtherDimensionsDictionary OtherDimensions { get; private set; }
+        public IEnumerable<IMeasure> Measures { get; private set; }
 
         public void Initialize(IEnumerable<IQueryDimension> others)
         {
             foreach (var child in QueryDimension.Dimension.Children)
             {
-                var result = new DimensionEntryResult<TFact>(child);
+                var result = new DimensionEntryResult<TFact>(child, Measures);
                 Entries[child] = result;
                 result.Initialize(others);
             }
@@ -62,7 +64,7 @@ namespace dasz.LinqCube
         {
             get
             {
-                return Dimensions[key];
+                return OtherDimensions[key];
             }
         }
 
@@ -94,32 +96,40 @@ namespace dasz.LinqCube
 
     public class DimensionEntryResult<TFact> : IDimensionEntryResult
     {
-        public DimensionEntryResult(IDimensionEntry e)
+        public DimensionEntryResult(IDimensionEntry e, IEnumerable<IMeasure> measures)
         {
             Entry = e;
             Entries = new DimensionResultEntriesDictionary();
-            Dimensions = new DimensionResultOtherDimensionsDictionary();
+            OtherDimensions = new DimensionResultOtherDimensionsDictionary();
+            Measures = measures;
+            Values = new MeasureResultDictionary();
         }
 
         public IDimensionEntry Entry { get; private set; }
         public DimensionResultEntriesDictionary Entries { get; private set; }
-        public DimensionResultOtherDimensionsDictionary Dimensions { get; private set; }
-        public int Value { get; set; }
+        public DimensionResultOtherDimensionsDictionary OtherDimensions { get; private set; }
+        public MeasureResultDictionary Values { get; private set; }
+        public IEnumerable<IMeasure> Measures { get; private set; }
 
         public void Initialize(IEnumerable<IQueryDimension> others)
         {
             foreach (var child in Entry.Children)
             {
-                var result = new DimensionEntryResult<TFact>(child);
+                var result = new DimensionEntryResult<TFact>(child, Measures);
                 Entries[child] = result;
                 result.Initialize(others);
             }
 
             foreach (var other in others)
             {
-                var otherResult = new DimensionResult<TFact>(other);
-                Dimensions[other] = otherResult;
+                var otherResult = new DimensionResult<TFact>(other, Measures);
+                OtherDimensions[other] = otherResult;
                 otherResult.Initialize(others.Where(i => i != other));
+            }
+
+            foreach (var measure in Measures)
+            {
+                Values[measure] = measure.CreateResult();
             }
         }
 
@@ -127,7 +137,7 @@ namespace dasz.LinqCube
         {
             get
             {
-                return Dimensions[key];
+                return OtherDimensions[key];
             }
         }
 
@@ -156,7 +166,7 @@ namespace dasz.LinqCube
                     }
                     else
                     {
-                        foreach (var dim in Dimensions)
+                        foreach (var dim in OtherDimensions)
                         {
                             if (dim.Key.Dimension == key.Root)
                             {

@@ -49,7 +49,8 @@
     <Compile Include="LinqCube\Dictionaries.cs" />
     <Compile Include="LinqCube\Dimension.cs" />
     <Compile Include="LinqCube\DimensionBuilder.cs" />
-    <Compile Include="LinqCube\Measure.cs" />
+    <Compile Include="LinqCube\Measures.cs" />
+    <Compile Include="LinqCube\MeasureResults.cs" />
     <Compile Include="LinqCube\Query.cs" />
     <Compile Include="LinqCube\QueryBuilder.cs" />
     <Compile Include="LinqCube\QueryResults.cs" />

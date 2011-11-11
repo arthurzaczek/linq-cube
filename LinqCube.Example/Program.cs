@@ -29,6 +29,10 @@ namespace dasz.LinqCube.Example
                     .BuildPartition(100)
                     .Build<decimal, Person>();
 
+            var countAll = new CountMeasure<Person>("Count", k => k);
+
+            var sumSalary = new DecimalSumMeasure<Person>("Sum of Salaries", k => k.Salary);
+
             CubeResult result;
             using (var ctx = new Repository())
             {
@@ -36,15 +40,15 @@ namespace dasz.LinqCube.Example
                                 new Query<Person>()
                                     .WithDimension(time)
                                     .WithDimension(gender)
-                                    .Count(i => i.ID),
+                                    .WithMeasure(countAll),
                                 new Query<Person>()
                                     .WithDimension(time_empstart)
                                     .WithDimension(gender)
                                     .WithDimension(salary)
-                                    .Count(i => i.ID),
+                                    .WithMeasure(countAll),
                                 new Query<Person>()
                                     .WithDimension(time_empstart)
-                                    .Count(i => i.ID)
+                                    .WithMeasure(countAll)
                 );
             }
 
@@ -59,8 +63,8 @@ namespace dasz.LinqCube.Example
                         Console.WriteLine("{0}: {1,12}, M: {2,3} W: {3,3}",
                             salary.Name,
                             gPart2.Label,
-                            result[1][year][gPart2][gender]["M"].Value,
-                            result[1][year][gPart2][gender]["F"].Value);
+                            result[1][year][gPart2][gender]["M"].Values[countAll],
+                            result[1][year][gPart2][gender]["F"].Values[countAll]);
                     }
                 }
                 Console.WriteLine();

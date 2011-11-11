@@ -7,19 +7,22 @@ namespace dasz.LinqCube
 {
     public class Query<TFact>
     {
-        public List<IQueryDimension> Dimensions { get; private set; }
+        internal List<IQueryDimension> QueryDimensions { get; private set; }
+        public List<IMeasure> Measures { get; private set; }
         public QueryResult Result { get; private set; }
 
         public Query()
         {
-            Dimensions = new List<IQueryDimension>();
+            QueryDimensions = new List<IQueryDimension>();
+            Measures = new List<IMeasure>();
         }
 
         public void Apply(TFact item)
         {
-            if (Result == null) throw new InvalidOperationException("Not initialized yet");
+            if (Measures.Count == 0) throw new InvalidOperationException("No measures added");
+            if (Result == null) throw new InvalidOperationException("Not initialized yet: no result created");
 
-            foreach (IQueryDimension dim in Dimensions)
+            foreach (IQueryDimension dim in QueryDimensions)
             {
                 var dimResult = Result[dim.Dimension];
                 dim.Apply(item, dimResult);
@@ -29,11 +32,14 @@ namespace dasz.LinqCube
         internal void Initialize()
         {
             Result = new QueryResult();
-            foreach (var dim in Dimensions)
+
+            foreach (var qDim in QueryDimensions)
             {
-                var dimResult = new DimensionResult<TFact>(dim);
-                Result[dim.Dimension] = dimResult;
-                dimResult.Initialize(Dimensions.Where(i => i != dim));
+                qDim.AddMeasures(Measures);
+
+                var dimResult = new DimensionResult<TFact>(qDim, Measures);
+                Result[qDim.Dimension] = dimResult;
+                dimResult.Initialize(QueryDimensions.Where(i => i != qDim));
             }
         }
     }
@@ -42,6 +48,8 @@ namespace dasz.LinqCube
     {
         void Apply(object item, IDimensionResult dimResult);
         IDimension Dimension { get; }
+
+        void AddMeasures(List<IMeasure> measures);
     }
 
     public class QueryDimension<TDimension, TFact> : IQueryDimension
@@ -49,10 +57,16 @@ namespace dasz.LinqCube
     {
         public Dimension<TDimension, TFact> Dimension { get; private set; }
         IDimension IQueryDimension.Dimension { get { return Dimension; } }
+        public List<IMeasure> Measures { get; private set; }
 
         public QueryDimension(Dimension<TDimension, TFact> dim)
         {
             this.Dimension = dim;
+        }
+
+        public void AddMeasures(List<IMeasure> measures)
+        {
+            this.Measures = measures;
         }
 
         public void Apply(object item, IDimensionResult dimResult)
@@ -62,15 +76,18 @@ namespace dasz.LinqCube
 
         private void Apply(TFact item, IDimensionParent<TDimension> parent, IDimensionResult dimResult)
         {
-            foreach (var child in parent.Children)
+            foreach (DimensionEntry<TDimension> child in parent.Children)
             {
-                var result = dimResult.Entries[child];                
+                IDimensionEntryResult result = dimResult.Entries[child];
                 if (child.InRange(Dimension.Selector(item)))
                 {
                     // Do something
-                    result.Value++;
+                    foreach (var measureResult in result.Values.Values)
+                    {
+                        measureResult.Measure.Apply(measureResult, item);
+                    }
                     // All other
-                    foreach (var otherDim in result.Dimensions)
+                    foreach (var otherDim in result.OtherDimensions)
                     {
                         otherDim.Key.Apply(item, otherDim.Value);
                     }

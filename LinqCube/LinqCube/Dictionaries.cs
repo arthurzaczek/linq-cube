@@ -26,4 +26,8 @@ namespace dasz.LinqCube
             }
         }
     }
+
+    public class MeasureResultDictionary : Dictionary<IMeasure, IMeasureResult>
+    {
+    }
 }
