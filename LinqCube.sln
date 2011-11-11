@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube", "LinqCube\LinqCube.csproj", "{EC97DECA-69FA-4903-8C5D-798ADBD84D98}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube.Example", "LinqCube.Example\LinqCube.Example.csproj", "{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{EC97DECA-69FA-4903-8C5D-798ADBD84D98}.Debug|x86.Build.0 = Debug|x86
 		{EC97DECA-69FA-4903-8C5D-798ADBD84D98}.Release|x86.ActiveCfg = Release|x86
 		{EC97DECA-69FA-4903-8C5D-798ADBD84D98}.Release|x86.Build.0 = Release|x86
+		{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}.Debug|x86.ActiveCfg = Debug|x86
+		{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}.Debug|x86.Build.0 = Debug|x86
+		{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}.Release|x86.ActiveCfg = Release|x86
+		{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

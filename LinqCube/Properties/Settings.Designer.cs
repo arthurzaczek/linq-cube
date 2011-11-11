@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LinqCube.Properties {
+namespace dasz.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

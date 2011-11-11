@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace LinqCube.LinqCube
+namespace dasz.LinqCube
 {
     public class DimensionResultEntriesDictionary : Dictionary<IDimensionEntry, IDimensionEntryResult>
     {

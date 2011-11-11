@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{EC97DECA-69FA-4903-8C5D-798ADBD84D98}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>dasz</RootNamespace>
-    <AssemblyName>LinqCube</AssemblyName>
+    <RootNamespace>dasz.LinqCube.Example</RootNamespace>
+    <AssemblyName>LinqCube.Example</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,45 +32,19 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data.Linq" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LinqCube\Cube.cs" />
-    <Compile Include="LinqCube\Dictionaries.cs" />
-    <Compile Include="LinqCube\Dimension.cs" />
-    <Compile Include="LinqCube\DimensionBuilder.cs" />
-    <Compile Include="LinqCube\Measure.cs" />
-    <Compile Include="LinqCube\Query.cs" />
-    <Compile Include="LinqCube\QueryBuilder.cs" />
-    <Compile Include="LinqCube\QueryResults.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
+    <Compile Include="Repository.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
+    <ProjectReference Include="..\LinqCube\LinqCube.csproj">
+      <Project>{EC97DECA-69FA-4903-8C5D-798ADBD84D98}</Project>
+      <Name>LinqCube</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

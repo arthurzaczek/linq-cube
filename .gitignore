@@ -1,4 +1,4 @@
 
 *.suo
-/LinqCube/obj
-/LinqCube/bin
+/*/obj
+/*/bin

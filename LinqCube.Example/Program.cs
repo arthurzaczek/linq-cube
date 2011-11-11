@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using LinqCube.LinqCube;
+using dasz.LinqCube;
 
-namespace LinqCube
+namespace dasz.LinqCube.Example
 {
     class Program
     {
