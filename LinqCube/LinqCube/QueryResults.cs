@@ -33,6 +33,7 @@ namespace dasz.LinqCube
     public interface IDimensionEntryResult : IDimensionResult
     {
         MeasureResultDictionary Values { get; }
+        IMeasureResult this[IMeasure key] { get; }
     }
 
     public class DimensionResult<TFact> : IDimensionResult
@@ -177,6 +178,14 @@ namespace dasz.LinqCube
 
                     throw new ArgumentOutOfRangeException("key", "key does not match dimension");
                 }
+            }
+        }
+
+        public IMeasureResult this[IMeasure key]
+        {
+            get
+            {
+                return Values[key];
             }
         }
     }

@@ -63,8 +63,8 @@ namespace dasz.LinqCube.Example
                         Console.WriteLine("{0}: {1,12}, M: {2,3} W: {3,3}",
                             salary.Name,
                             gPart2.Label,
-                            result[1][year][gPart2][gender]["M"].Values[countAll],
-                            result[1][year][gPart2][gender]["F"].Values[countAll]);
+                            result[1][year][gPart2][gender]["M"][countAll],
+                            result[1][year][gPart2][gender]["F"][countAll]);
                     }
                 }
                 Console.WriteLine();
