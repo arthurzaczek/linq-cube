@@ -5,7 +5,7 @@ using System.Text;
 
 namespace dasz.LinqCube
 {
-    public class Query<Q>
+    public class Query<TFact>
     {
         public List<IQueryDimension> Dimensions { get; private set; }
         public QueryResult Result { get; private set; }
@@ -15,7 +15,7 @@ namespace dasz.LinqCube
             Dimensions = new List<IQueryDimension>();
         }
 
-        public void Apply(Q item)
+        public void Apply(TFact item)
         {
             if (Result == null) throw new InvalidOperationException("Not initialized yet");
 
@@ -31,7 +31,7 @@ namespace dasz.LinqCube
             Result = new QueryResult();
             foreach (var dim in Dimensions)
             {
-                var dimResult = new DimensionResult<Q>(dim);
+                var dimResult = new DimensionResult<TFact>(dim);
                 Result[dim.Dimension] = dimResult;
                 dimResult.Initialize(Dimensions.Where(i => i != dim));
             }
@@ -44,23 +44,23 @@ namespace dasz.LinqCube
         IDimension Dimension { get; }
     }
 
-    public class QueryDimension<T, Q> : IQueryDimension
-        where T : IComparable
+    public class QueryDimension<TDimension, TFact> : IQueryDimension
+        where TDimension : IComparable
     {
-        public Dimension<T, Q> Dimension { get; private set; }
+        public Dimension<TDimension, TFact> Dimension { get; private set; }
         IDimension IQueryDimension.Dimension { get { return Dimension; } }
 
-        public QueryDimension(Dimension<T, Q> dim)
+        public QueryDimension(Dimension<TDimension, TFact> dim)
         {
             this.Dimension = dim;
         }
 
         public void Apply(object item, IDimensionResult dimResult)
         {
-            Apply((Q)item, Dimension, dimResult);
+            Apply((TFact)item, Dimension, dimResult);
         }
 
-        private void Apply(Q item, IDimensionParent<T> parent, IDimensionResult dimResult)
+        private void Apply(TFact item, IDimensionParent<TDimension> parent, IDimensionResult dimResult)
         {
             foreach (var child in parent.Children)
             {

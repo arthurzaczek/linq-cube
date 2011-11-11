@@ -35,7 +35,7 @@ namespace dasz.LinqCube
         int Value { get; set; }
     }
 
-    public class DimensionResult<Q> : IDimensionResult
+    public class DimensionResult<TFact> : IDimensionResult
     {
         public DimensionResult(IQueryDimension dim)
         {
@@ -52,7 +52,7 @@ namespace dasz.LinqCube
         {
             foreach (var child in QueryDimension.Dimension.Children)
             {
-                var result = new DimensionEntryResult<Q>(child);
+                var result = new DimensionEntryResult<TFact>(child);
                 Entries[child] = result;
                 result.Initialize(others);
             }
@@ -92,7 +92,7 @@ namespace dasz.LinqCube
         }
     }
 
-    public class DimensionEntryResult<Q> : IDimensionEntryResult
+    public class DimensionEntryResult<TFact> : IDimensionEntryResult
     {
         public DimensionEntryResult(IDimensionEntry e)
         {
@@ -110,14 +110,14 @@ namespace dasz.LinqCube
         {
             foreach (var child in Entry.Children)
             {
-                var result = new DimensionEntryResult<Q>(child);
+                var result = new DimensionEntryResult<TFact>(child);
                 Entries[child] = result;
                 result.Initialize(others);
             }
 
             foreach (var other in others)
             {
-                var otherResult = new DimensionResult<Q>(other);
+                var otherResult = new DimensionResult<TFact>(other);
                 Dimensions[other] = otherResult;
                 otherResult.Initialize(others.Where(i => i != other));
             }

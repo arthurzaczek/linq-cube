@@ -5,12 +5,12 @@ using System.Text;
 
 namespace dasz.LinqCube
 {
-    public interface IDimensionParent<T>
-        where T : IComparable
+    public interface IDimensionParent<TDimension>
+        where TDimension : IComparable
     {
-        IDimensionParent<T> Parent { get; }
+        IDimensionParent<TDimension> Parent { get; }
         IDimension Root { get; }
-        List<DimensionEntry<T>> Children { get; }
+        List<DimensionEntry<TDimension>> Children { get; }
     }
 
     public interface IDimension
@@ -30,22 +30,22 @@ namespace dasz.LinqCube
     /// <summary>
     /// Dimension descriptor, 
     /// </summary>
-    public class Dimension<T, Q> : IDimensionParent<T>, IDimension
-        where T : IComparable
+    public class Dimension<TDimension, TFact> : IDimensionParent<TDimension>, IDimension
+        where TDimension : IComparable
     {
-        public Dimension(string name, Func<Q, T> selector)
+        public Dimension(string name, Func<TFact, TDimension> selector)
         {
             this.Name = name;
-            Children = new List<DimensionEntry<T>>();
+            Children = new List<DimensionEntry<TDimension>>();
             this.Selector = selector;
         }
 
         public string Name { get; private set; }
-        public Func<Q, T> Selector { get; private set; }
+        public Func<TFact, TDimension> Selector { get; private set; }
 
-        public IDimensionParent<T> Parent { get { return null; } }
+        public IDimensionParent<TDimension> Parent { get { return null; } }
         public IDimension Root { get { return this; } }
-        public List<DimensionEntry<T>> Children { get; private set; }
+        public List<DimensionEntry<TDimension>> Children { get; private set; }
         IEnumerable<IDimensionEntry> IDimension.Children { get { return Children.Cast<IDimensionEntry>(); } }
 
         public override string ToString()
@@ -54,14 +54,14 @@ namespace dasz.LinqCube
         }
     }
 
-    public class DimensionEntry<T> : IDimensionParent<T>, IDimensionEntry
-        where T : IComparable
+    public class DimensionEntry<TDimension> : IDimensionParent<TDimension>, IDimensionEntry
+        where TDimension : IComparable
     {
-        public DimensionEntry(string label, IDimensionParent<T> parent)
+        public DimensionEntry(string label, IDimensionParent<TDimension> parent)
         {
             this.Parent = parent;
             this.Label = label;
-            Children = new List<DimensionEntry<T>>();
+            Children = new List<DimensionEntry<TDimension>>();
         }
 
         public string Label { get; set; }
@@ -69,19 +69,19 @@ namespace dasz.LinqCube
         /// <summary>
         /// Min Value, incl.
         /// </summary>
-        public T Min { get; set; }
+        public TDimension Min { get; set; }
 
         /// <summary>
         /// Max Value, excl.
         /// </summary>
-        public T Max { get; set; }
+        public TDimension Max { get; set; }
 
-        private T _value;
+        private TDimension _value;
         private bool hasValue = false;
         /// <summary>
         /// Distinct value
         /// </summary>
-        public T Value
+        public TDimension Value
         {
             get
             {
@@ -94,7 +94,7 @@ namespace dasz.LinqCube
             }
         }
 
-        public bool InRange(T value)
+        public bool InRange(TDimension value)
         {
             if (hasValue)
             {
@@ -106,9 +106,9 @@ namespace dasz.LinqCube
             }
         }
 
-        public IDimensionParent<T> Parent { get; private set; }
+        public IDimensionParent<TDimension> Parent { get; private set; }
         public IDimension Root { get { return Parent.Root; } }
-        public List<DimensionEntry<T>> Children { get; private set; }
+        public List<DimensionEntry<TDimension>> Children { get; private set; }
         IEnumerable<IDimensionEntry> IDimensionEntry.Children { get { return Children.Cast<IDimensionEntry>(); } }
 
         public string DebugOut()

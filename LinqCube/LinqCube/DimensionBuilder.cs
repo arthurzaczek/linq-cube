@@ -7,10 +7,10 @@ namespace dasz.LinqCube
 {
     public static class DimensionBuilder
     {
-        public static Dimension<T, Q> Build<T, Q>(this List<DimensionEntry<T>> lst)
-            where T : IComparable
+        public static Dimension<TDimension, TFact> Build<TDimension, TFact>(this List<DimensionEntry<TDimension>> lst)
+            where TDimension : IComparable
         {
-            return (Dimension<T, Q>)lst.First().Root;
+            return (Dimension<TDimension, TFact>)lst.First().Root;
         }
 
         public static List<DimensionEntry<DateTime>> BuildDecade(this IDimensionParent<DateTime> parent, DateTime from, DateTime until)

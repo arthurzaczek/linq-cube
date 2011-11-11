@@ -7,7 +7,7 @@ namespace dasz.LinqCube
 {
     public class Cube
     {
-        public static CubeResult Execute<Q>(IQueryable<Q> source, params Query<Q>[] queries)
+        public static CubeResult Execute<TFact>(IQueryable<TFact> source, params Query<TFact>[] queries)
         {
             var result = new CubeResult();
 
