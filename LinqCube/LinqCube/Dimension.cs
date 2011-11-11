@@ -34,14 +34,21 @@ namespace dasz.LinqCube
         where TDimension : IComparable
     {
         public Dimension(string name, Func<TFact, TDimension> selector)
+            : this(name, selector, null)
+        {
+        }
+
+        public Dimension(string name, Func<TFact, TDimension> startSelector, Func<TFact, TDimension> endSelector)
         {
             this.Name = name;
             Children = new List<DimensionEntry<TDimension>>();
-            this.Selector = selector;
+            this.Selector = startSelector;
+            this.EndSelector = endSelector;
         }
 
         public string Name { get; private set; }
         public Func<TFact, TDimension> Selector { get; private set; }
+        public Func<TFact, TDimension> EndSelector { get; private set; }
 
         public IDimensionParent<TDimension> Parent { get { return null; } }
         public IDimension Root { get { return this; } }
@@ -103,6 +110,19 @@ namespace dasz.LinqCube
             else
             {
                 return Min.CompareTo(value) <= 0 && Max.CompareTo(value) > 0;
+            }
+        }
+
+        internal bool InRange(TDimension lower, TDimension upper)
+        {
+            if (hasValue)
+            {
+                throw new InvalidOperationException("tried filtering a range on a discrete dimension");
+            }
+            else
+            {
+                return (Min.CompareTo(lower) >= 0 && Min.CompareTo(upper) < 0)
+                    || (Min.CompareTo(lower) < 0 && Max.CompareTo(lower) >= 0);
             }
         }
 

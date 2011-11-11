@@ -20,6 +20,10 @@ namespace dasz.LinqCube.Example
                     .BuildYear(new DateTime(2001, 1, 1), new DateTime(2011, 1, 1))
                     .Build<DateTime, Person>();
 
+            var time_employment = new Dimension<DateTime, Person>("Time employment", k => k.EmploymentStart, k => k.EmploymentEnd ?? DateTime.MaxValue)
+                    .BuildYear(new DateTime(2001, 1, 1), new DateTime(2011, 1, 1))
+                    .Build<DateTime, Person>();
+
             var gender = new Dimension<string, Person>("Gender", k => k.Gender)
                     .BuildEnum("M", "F")
                     .Build<string, Person>();
@@ -45,8 +49,8 @@ namespace dasz.LinqCube.Example
                                     .WithMeasure(countAll)
                                     .WithMeasure(sumSalary);
 
-            var employmentCountQuery = new Query<Person>("count by date of employment")
-                                    .WithDimension(time_empstart)
+            var employmentCountQuery = new Query<Person>("count currently employed")
+                                    .WithDimension(time_employment)
                                     .WithMeasure(countAll);
 
             CubeResult result;
@@ -59,6 +63,12 @@ namespace dasz.LinqCube.Example
                 );
             }
 
+            ////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////
+
+            Console.WriteLine(salaryQuery.Name);
+            Console.WriteLine("==================");
+            Console.WriteLine();
             foreach (var year in time_empstart.Children)
             {
                 Console.WriteLine(year.Label);
@@ -77,6 +87,18 @@ namespace dasz.LinqCube.Example
                 Console.WriteLine();
             }
 
+            ////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////
+
+            Console.WriteLine(employmentCountQuery.Name);
+            Console.WriteLine("==================");
+            Console.WriteLine();
+            foreach (var year in time_employment.Children)
+            {
+                Console.WriteLine("{0}: {1,6}",
+                    year.Label,
+                    result[employmentCountQuery][year][countAll]);
+            }
 
             Console.WriteLine("Finished, hit the anykey to exit");
             Console.ReadKey();

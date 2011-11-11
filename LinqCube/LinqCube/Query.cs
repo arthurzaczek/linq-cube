@@ -88,7 +88,17 @@ namespace dasz.LinqCube
             foreach (DimensionEntry<TDimension> child in parent.Children)
             {
                 IDimensionEntryResult result = dimResult.Entries[child];
-                if (child.InRange(Dimension.Selector(item)))
+                var match = false;
+                if (Dimension.EndSelector == null)
+                {
+                    match = child.InRange(Dimension.Selector(item));
+                }
+                else
+                {
+                    match = child.InRange(Dimension.Selector(item), Dimension.EndSelector(item));
+                }
+
+                if (match)
                 {
                     // Do something
                     foreach (var measureResult in result.Values.Values)
