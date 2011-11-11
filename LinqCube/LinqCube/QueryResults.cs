@@ -11,7 +11,7 @@ namespace dasz.LinqCube
         {
         }
 
-        public IDimensionResult this[IDimensionEntry key]
+        public IDimensionEntryResult this[IDimensionEntry key]
         {
             get
             {
