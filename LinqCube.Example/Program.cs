@@ -38,7 +38,7 @@ namespace dasz.LinqCube.Example
                 .Build<string, Person>();
 
             Console.WriteLine("Building measures");
-            var countAll = new CountMeasure<Person>("Count", k => k);
+            var countAll = new CountMeasure<Person>("Count", k => true);
 
             var sumSalary = new DecimalSumMeasure<Person>("Sum of Salaries", k => k.Salary);
 

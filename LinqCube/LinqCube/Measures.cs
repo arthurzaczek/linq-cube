@@ -50,9 +50,9 @@ namespace dasz.LinqCube
         }
     }
 
-    public class CountMeasure<TFact> : Measure<TFact, object>
+    public class CountMeasure<TFact> : Measure<TFact, bool>
     {
-        public CountMeasure(string name, Func<TFact, object> selector)
+        public CountMeasure(string name, Func<TFact, bool> selector)
             : base(name, selector)
         {
         }
@@ -65,7 +65,7 @@ namespace dasz.LinqCube
         public override void Apply(IMeasureResult result, object item)
         {
             var myResult = (IntMeasureResult)result;
-            if (Selector((TFact)item) != null)
+            if (Selector((TFact)item))
             {
                 myResult.Set(myResult.IntValue + 1);
             }
