@@ -8,7 +8,6 @@ namespace dasz.LinqCube
     public interface IMeasureResult
     {
         string Name { get; }
-        IMeasure Measure { get; }
 
         int IntValue { get; }
         double DoubleValue { get; }

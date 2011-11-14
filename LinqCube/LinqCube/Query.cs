@@ -101,9 +101,9 @@ namespace dasz.LinqCube
                 if (match)
                 {
                     // Do something
-                    foreach (var measureResult in result.Values.Values)
+                    foreach (var kvp in result.Values)
                     {
-                        measureResult.Measure.Apply(measureResult, item);
+                        kvp.Key.Apply(kvp.Value, item);
                     }
                     // All other
                     foreach (var otherDim in result.OtherDimensions)
