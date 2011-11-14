@@ -13,14 +13,12 @@ namespace dasz.LinqCube
             return (Dimension<TDimension, TFact>)lst.First().Root;
         }
 
-        public static List<DimensionEntry<DateTime>> BuildDecade(this IDimensionParent<DateTime> parent, DateTime from, DateTime until)
+        public static List<DimensionEntry<DateTime>> BuildDecade(this IDimensionParent<DateTime> parent, int fromYear, int thruYear)
         {
-            for (int decade = from.Year / 10 * 10; decade <= until.Year / 10 * 10; decade += 10)
+            for (int decade = fromYear / 10 * 10; decade <= thruYear / 10 * 10; decade += 10)
             {
                 var dtFrom = new DateTime(decade, 1, 1);
                 var dtUntil = new DateTime(decade + 10, 1, 1);
-                if (dtFrom < from) dtFrom = from;
-                if (dtUntil > until) dtUntil = until;
 
                 parent.Children.Add(new DimensionEntry<DateTime>(decade.ToString(), parent)
                 {
@@ -32,14 +30,12 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
-        public static List<DimensionEntry<DateTime>> BuildYear(this IDimensionParent<DateTime> parent, DateTime from, DateTime until)
+        public static List<DimensionEntry<DateTime>> BuildYear(this IDimensionParent<DateTime> parent, int fromYear, int thruYear)
         {
-            for (int year = from.Year; year < until.Year; year++)
+            for (int year = fromYear; year <= thruYear; year++)
             {
                 var dtFrom = new DateTime(year, 1, 1);
                 var dtUntil = new DateTime(year + 1, 1, 1);
-                if (dtFrom < from) dtFrom = from;
-                if (dtUntil > until) dtUntil = until;
 
                 parent.Children.Add(new DimensionEntry<DateTime>(year.ToString(), parent)
                 {
@@ -55,7 +51,7 @@ namespace dasz.LinqCube
         {
             foreach (var parent in lst)
             {
-                BuildYear(parent, parent.Min, parent.Max);
+                BuildYear(parent, parent.Min.Year, parent.Max.Year);
             }
             return lst.SelectMany(i => i.Children).ToList();
         }
@@ -68,8 +64,6 @@ namespace dasz.LinqCube
                 {
                     var dtFrom = new DateTime(parent.Min.Year, ((quater - 1) * 3) + 1, 1);
                     var dtUntil = dtFrom.AddMonths(3);
-                    if (dtFrom < parent.Min) dtFrom = parent.Min;
-                    if (dtUntil > parent.Max) dtUntil = parent.Max;
 
                     parent.Children.Add(new DimensionEntry<DateTime>(quater.ToString(), parent)
                     {
@@ -90,8 +84,6 @@ namespace dasz.LinqCube
                 {
                     var dtFrom = new DateTime(parent.Min.Year, month, 1);
                     var dtUntil = dtFrom.AddMonths(1);
-                    if (dtFrom < parent.Min) dtFrom = parent.Min;
-                    if (dtUntil > parent.Max) dtUntil = parent.Max;
 
                     parent.Children.Add(new DimensionEntry<DateTime>(month.ToString(), parent)
                     {
@@ -159,7 +151,7 @@ namespace dasz.LinqCube
                     var prev = parent.Min;
                     for (var limit = prev + stepSize; limit <= parent.Max; limit += stepSize)
                     {
-                        parent.Children.Add(new DimensionEntry<decimal>(string.Format("{0} - {1}", prev , limit), parent)
+                        parent.Children.Add(new DimensionEntry<decimal>(string.Format("{0} - {1}", prev, limit), parent)
                         {
                             Min = prev,
                             Max = limit
