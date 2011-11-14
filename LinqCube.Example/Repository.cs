@@ -13,12 +13,22 @@ namespace dasz.LinqCube.Example
         public DateTime EmploymentStart { get; set; }
         public DateTime? EmploymentEnd { get; set; }
         public decimal Salary { get; set; }
+        public string Office { get; set; }
     }
 
     public class Repository : IDisposable
     {
         public static readonly int DATA_COUNT = 50000;
         private static List<Person> _persons;
+        public static readonly string[] OFFICES = new[]
+        {
+            "New York",
+            "Vienna",
+            "Moscow",
+            "Bejing",
+            "Sydney",
+            "Rio de Janeiro",
+        };
 
         public IQueryable<Person> Persons
         {
@@ -56,6 +66,7 @@ namespace dasz.LinqCube.Example
                     Birthday = DateTime.Today.AddYears(-18).AddDays(-rnd.Next(14600)),
                     EmploymentStart = empStart,
                     EmploymentEnd = empEnd,
+                    Office = OFFICES[rnd.Next(OFFICES.Length)],
                 });
             }
 

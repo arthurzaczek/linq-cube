@@ -33,10 +33,16 @@ namespace dasz.LinqCube.Example
                     .BuildPartition(100)
                     .Build<decimal, Person>();
 
+            Dimension<string, Person> offices = new Dimension<string, Person>("Office", k => k.Office)
+                .BuildEnum(Repository.OFFICES)
+                .Build<string, Person>();
+
+            Console.WriteLine("Building measures");
             var countAll = new CountMeasure<Person>("Count", k => k);
 
             var sumSalary = new DecimalSumMeasure<Person>("Sum of Salaries", k => k.Salary);
 
+            Console.WriteLine("Building queries");
             var genderAgeQuery = new Query<Person>("gender over birthday")
                                     .WithDimension(time)
                                     .WithDimension(gender)
@@ -49,8 +55,9 @@ namespace dasz.LinqCube.Example
                                     .WithMeasure(countAll)
                                     .WithMeasure(sumSalary);
 
-            var employmentCountQuery = new Query<Person>("count currently employed")
+            var countByOfficeQuery = new Query<Person>("count currently employed by office")
                                     .WithDimension(time_employment)
+                                    .WithDimension(offices)
                                     .WithMeasure(countAll);
 
             CubeResult result;
@@ -59,7 +66,7 @@ namespace dasz.LinqCube.Example
                 result = Cube.Execute(ctx.Persons,
                                 genderAgeQuery,
                                 salaryQuery,
-                                employmentCountQuery
+                                countByOfficeQuery
                 );
             }
 
@@ -90,14 +97,21 @@ namespace dasz.LinqCube.Example
             ////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////
 
-            Console.WriteLine(employmentCountQuery.Name);
+            Console.WriteLine(countByOfficeQuery.Name);
             Console.WriteLine("==================");
             Console.WriteLine();
-            foreach (var year in time_employment.Children)
+            Console.WriteLine("{0,10}|{1}",
+                string.Empty,
+                string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", c.Label)).ToArray())
+            );
+            Console.WriteLine("----------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------");
+            foreach (var officeEntry in offices.Children)
             {
-                Console.WriteLine("{0}: {1,6}",
-                    year.Label,
-                    result[employmentCountQuery][year][countAll]);
+                var officeCounts = result[countByOfficeQuery][officeEntry];
+                Console.WriteLine("{0,10}|{1}",
+                    officeEntry.Label,
+                    string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", officeCounts[c][countAll])).ToArray())
+                );
             }
 
             Console.WriteLine("Finished, hit the anykey to exit");
