@@ -68,7 +68,7 @@ namespace dasz.LinqCube
 
         public override string ToString()
         {
-            return _value.ToString();
+            return string.Format("res: {0} = {1}", Name, _value);
         }
     }
 
@@ -120,7 +120,7 @@ namespace dasz.LinqCube
 
         public override string ToString()
         {
-            return _value.ToString();
+            return string.Format("res: {0} = {1}", Name, _value);
         }
     }
 
@@ -172,7 +172,7 @@ namespace dasz.LinqCube
 
         public override string ToString()
         {
-            return _value.ToString();
+            return string.Format("res: {0} = {1}", Name, _value);
         }
     }
 }

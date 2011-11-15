@@ -29,6 +29,11 @@ namespace dasz.LinqCube
 
         public abstract IMeasureResult CreateResult();
         public abstract void Apply(IMeasureResult result, object item);
+
+        public override string ToString()
+        {
+            return string.Format("Measure: {0}", Name);
+        }
     }
 
     public class DecimalSumMeasure<TFact> : Measure<TFact, decimal>
