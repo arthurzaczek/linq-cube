@@ -33,6 +33,8 @@ namespace dasz.LinqCube
 
     public interface IDimensionEntryResult : IDimensionResult
     {
+        IDimensionEntry DimensionEntry { get; }
+
         MeasureResultDictionary Values { get; }
         IMeasureResult this[IMeasure key] { get; }
 
@@ -104,15 +106,15 @@ namespace dasz.LinqCube
     {
         public DimensionEntryResult(IDimensionEntry e, IEnumerable<IMeasure> measures)
         {
-            Entry = e;
+            DimensionEntry = e;
             Entries = new DimensionResultEntriesDictionary();
             OtherDimensions = new DimensionResultOtherDimensionsDictionary();
             Measures = measures;
             Values = new MeasureResultDictionary();
         }
 
-        public IDimension Dimension { get { return this.Entry.Root; } }
-        public IDimensionEntry Entry { get; private set; }
+        public IDimension Dimension { get { return this.DimensionEntry.Root; } }
+        public IDimensionEntry DimensionEntry { get; private set; }
         public DimensionResultEntriesDictionary Entries { get; private set; }
         public DimensionResultOtherDimensionsDictionary OtherDimensions { get; private set; }
         public MeasureResultDictionary Values { get; private set; }
@@ -134,7 +136,7 @@ namespace dasz.LinqCube
         public void Initialize(IEnumerable<IQueryDimension> others, IDimensionEntryResult parentCoordinate)
         {
             ParentCoordinate = parentCoordinate;
-            foreach (var child in Entry.Children)
+            foreach (var child in DimensionEntry.Children)
             {
                 var result = new DimensionEntryResult<TFact>(child, Measures);
                 Entries[child] = result;
@@ -207,6 +209,25 @@ namespace dasz.LinqCube
             {
                 return Values[key];
             }
+        }
+    }
+
+    public static class DimensionEntryResultExtensions
+    {
+        public static bool Count<TDimension>(this IDimensionEntryResult current, IDimension dim, Func<DimensionEntry<TDimension>, bool> selector)
+            where TDimension : IComparable
+        {
+            if (current == null) return false;
+            var dimEntryResult = current.CubeCoordinates.FirstOrDefault(c => c.Dimension == dim);
+            if (dimEntryResult != null)
+            {
+                var dimEntry = (DimensionEntry<TDimension>)dimEntryResult.DimensionEntry;
+                if (dimEntry != null)
+                {
+                    return selector(dimEntry);
+                }
+            }
+            return false;
         }
     }
 }

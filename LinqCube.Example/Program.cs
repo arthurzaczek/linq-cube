@@ -43,29 +43,7 @@ namespace dasz.LinqCube.Example
 
             var countEmployedFullMonth = new FilteredMeasure<Person, bool>("Count full month", k => k.EmploymentStart.Day == 1, countAll);
 
-            var countStartingEmployment = new CountMeasure<Person>("Count Starting Employment (whole year)", (k, entry) =>
-            {
-                if (entry == null) return false;
-                var dateSlotResult = (DimensionEntryResult<Person>)entry.CubeCoordinates.FirstOrDefault(c => c.Dimension == time_employment);
-                if (dateSlotResult != null)
-                {
-                    var dateSlot = (DimensionEntry<DateTime>)dateSlotResult.Entry;
-                    if (dateSlot != null)
-                    {
-                        var r = dateSlot.Min.Year == k.EmploymentStart.Year;
-                        if (r == false && dateSlot.Min.Year == 2001)
-                        {
-                            Console.WriteLine();
-                        }
-                        return r;
-                    }
-                    else { return false; }
-                }
-                else
-                {
-                    return false;
-                }
-            });
+            var countStartingEmployment = new CountMeasure<Person>("Count Starting Employment (whole year)", (k, entry) => entry.Count<DateTime>(time_employment, (e) => e.Min.Year == k.EmploymentStart.Year));
 
             var sumSalary = new DecimalSumMeasure<Person>("Sum of Salaries", k => k.Salary);
 
