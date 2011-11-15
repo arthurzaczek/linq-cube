@@ -17,7 +17,8 @@ namespace dasz.LinqCube.Example
                     .Build<DateTime, Person>();
 
             var time_empstart = new Dimension<DateTime, Person>("Time employment start", k => k.EmploymentStart)
-                    .BuildYear(2001, 2011)
+                    .BuildYearSlice(2001, 2011, 1, null, 9, null) // only look at jan-sept
+                    .BuildMonths()
                     .Build<DateTime, Person>();
 
             var time_employment = new Dimension<DateTime, Person>("Time employment", k => k.EmploymentStart, k => k.EmploymentEnd ?? DateTime.MaxValue)

@@ -13,14 +13,14 @@ namespace dasz.LinqCube
             return (Dimension<TDimension, TFact>)lst.First().Root;
         }
 
-        public static List<DimensionEntry<DateTime>> BuildDecade(this IDimensionParent<DateTime> parent, int fromYear, int thruYear)
+        public static List<DimensionEntry<DateTime>> BuildYear(this IDimensionParent<DateTime> parent, int fromYear, int thruYear)
         {
-            for (int decade = fromYear / 10 * 10; decade <= thruYear / 10 * 10; decade += 10)
+            for (int year = fromYear; year <= thruYear; year++)
             {
-                var dtFrom = new DateTime(decade, 1, 1);
-                var dtUntil = new DateTime(decade + 10, 1, 1);
+                var dtFrom = new DateTime(year, 1, 1);
+                var dtUntil = new DateTime(year + 1, 1, 1);
 
-                parent.Children.Add(new DimensionEntry<DateTime>(decade.ToString(), parent)
+                parent.Children.Add(new DimensionEntry<DateTime>(year.ToString(), parent)
                 {
                     Min = dtFrom,
                     Max = dtUntil
@@ -30,12 +30,33 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
-        public static List<DimensionEntry<DateTime>> BuildYear(this IDimensionParent<DateTime> parent, int fromYear, int thruYear)
+        public static List<DimensionEntry<DateTime>> BuildYearRange(this IDimensionParent<DateTime> parent, DateTime from, DateTime thruDay)
+        {
+            if (from != from.Date) throw new ArgumentOutOfRangeException("from", "contains time component");
+            if (thruDay != thruDay.Date) throw new ArgumentOutOfRangeException("thruDay", "contains time component");
+
+            var children = BuildYear(parent, from.Year, thruDay.Year);
+
+            children.First().Min = from;
+            children.Last().Max = thruDay.AddDays(1);
+
+            return parent.Children;
+        }
+
+        public static List<DimensionEntry<DateTime>> BuildYearSlice(this IDimensionParent<DateTime> parent, int fromYear, int thruYear, int sliceFromMonth, int? sliceFromDay, int sliceThruMonth, int? sliceThruDay)
         {
             for (int year = fromYear; year <= thruYear; year++)
             {
-                var dtFrom = new DateTime(year, 1, 1);
-                var dtUntil = new DateTime(year + 1, 1, 1);
+                var dtFrom = new DateTime(year, sliceFromMonth, sliceFromDay ?? 1);
+                var dtUntil = new DateTime(year, sliceThruMonth, 1);
+                if (sliceThruDay.HasValue)
+                {
+                    dtUntil = dtUntil.AddDays(sliceThruDay.Value + 1);
+                }
+                else
+                {
+                    dtUntil = dtUntil.AddMonths(1);
+                }
 
                 parent.Children.Add(new DimensionEntry<DateTime>(year.ToString(), parent)
                 {
@@ -64,6 +85,8 @@ namespace dasz.LinqCube
                 {
                     var dtFrom = new DateTime(parent.Min.Year, ((quater - 1) * 3) + 1, 1);
                     var dtUntil = dtFrom.AddMonths(3);
+                    if (dtFrom < parent.Min) dtFrom = parent.Min;
+                    if (dtUntil > parent.Max) dtUntil = parent.Max;
 
                     parent.Children.Add(new DimensionEntry<DateTime>(quater.ToString(), parent)
                     {
@@ -80,16 +103,21 @@ namespace dasz.LinqCube
         {
             foreach (var parent in lst)
             {
-                for (int month = 1; month <= 12; month++)
+                for (int month = parent.Min.Month; month <= parent.Max.Month; month++)
                 {
                     var dtFrom = new DateTime(parent.Min.Year, month, 1);
                     var dtUntil = dtFrom.AddMonths(1);
+                    if (dtFrom < parent.Min) dtFrom = parent.Min;
+                    if (dtUntil > parent.Max) dtUntil = parent.Max;
 
-                    parent.Children.Add(new DimensionEntry<DateTime>(month.ToString(), parent)
+                    if (dtUntil != dtFrom)
                     {
-                        Min = dtFrom,
-                        Max = dtUntil
-                    });
+                        parent.Children.Add(new DimensionEntry<DateTime>(month.ToString(), parent)
+                        {
+                            Min = dtFrom,
+                            Max = dtUntil
+                        });
+                    }
                 }
             }
 
