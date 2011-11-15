@@ -51,7 +51,7 @@ namespace dasz.LinqCube
                 var dtUntil = new DateTime(year, sliceThruMonth, 1);
                 if (sliceThruDay.HasValue)
                 {
-                    dtUntil = dtUntil.AddDays(sliceThruDay.Value + 1);
+                    dtUntil = dtUntil.AddDays(sliceThruDay.Value - 1 + 1); // offset for starting on the first and adding one day for "thru" -> "max" transformation
                 }
                 else
                 {
