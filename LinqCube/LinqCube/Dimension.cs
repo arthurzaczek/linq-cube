@@ -121,8 +121,8 @@ namespace dasz.LinqCube
             }
             else
             {
-                return (Min.CompareTo(lower) >= 0 && Min.CompareTo(upper) < 0)
-                    || (Min.CompareTo(lower) < 0 && Max.CompareTo(lower) >= 0);
+                return (lower.CompareTo(Min) >= 0 && lower.CompareTo(Max) < 0)
+                    || (lower.CompareTo(Min) < 0 && upper.CompareTo(Min) >= 0);
             }
         }
 
