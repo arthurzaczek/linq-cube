@@ -50,6 +50,25 @@ namespace dasz.LinqCube
         }
     }
 
+    public class DoubleSumMeasure<TFact> : Measure<TFact, double>
+    {
+        public DoubleSumMeasure(string name, Func<TFact, double> selector)
+            : base(name, selector)
+        {
+        }
+
+        public override IMeasureResult CreateResult()
+        {
+            return new DoubleMeasureResult(this, 0);
+        }
+
+        public override void Apply(IMeasureResult result, object item)
+        {
+            var myResult = (DoubleMeasureResult)result;
+            myResult.Set(myResult.DoubleValue + Selector((TFact)item));
+        }
+    }
+
     public class CountMeasure<TFact> : Measure<TFact, bool>
     {
         public CountMeasure(string name, Func<TFact, bool> selector)

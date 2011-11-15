@@ -70,8 +70,58 @@ namespace dasz.LinqCube
         {
             return _value.ToString();
         }
+    }
 
+    public class DoubleMeasureResult : IMeasureResult
+    {
+        private double _value;
+        public DoubleMeasureResult(IMeasure measure, double init)
+        {
+            this._value = init;
+            this.Measure = measure;
+            this.Count = 0;
+        }
 
+        public IMeasure Measure { get; private set; }
+        public string Name { get { return Measure.Name; } }
+
+        public int Count { get; private set; }
+
+        public int IntValue
+        {
+            get { return (int)_value; }
+        }
+
+        public double DoubleValue
+        {
+            get { return _value; }
+        }
+
+        public decimal DecimalValue
+        {
+            get { return (decimal)_value; }
+        }
+
+        public DateTime DateTimeValue
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        public TimeSpan TimeSpanValue
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        public void Set(double item)
+        {
+            _value = item;
+            Count += 1;
+        }
+
+        public override string ToString()
+        {
+            return _value.ToString();
+        }
     }
 
     public class IntMeasureResult : IMeasureResult
