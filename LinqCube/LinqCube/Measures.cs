@@ -71,4 +71,33 @@ namespace dasz.LinqCube
             }
         }
     }
+
+    public class FilteredMeasure<TFact, TIntermediate> : Measure<TFact, bool>
+    {
+        public Measure<TFact, TIntermediate> Measure { get; private set; }
+
+        public FilteredMeasure(Func<TFact, bool> filter, Measure<TFact, TIntermediate> measure)
+            : this(measure.Name, filter, measure)
+        {
+        }
+
+        public FilteredMeasure(string name, Func<TFact, bool> filter, Measure<TFact, TIntermediate> measure)
+            : base(name, filter)
+        {
+            this.Measure = measure;
+        }
+
+        public override IMeasureResult CreateResult()
+        {
+            return this.Measure.CreateResult();
+        }
+
+        public override void Apply(IMeasureResult result, object item)
+        {
+            if (Selector((TFact)item))
+            {
+                this.Measure.Apply(result, item);
+            }
+        }
+    }
 }

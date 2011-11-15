@@ -40,6 +40,8 @@ namespace dasz.LinqCube.Example
             Console.WriteLine("Building measures");
             var countAll = new CountMeasure<Person>("Count", k => true);
 
+            var countEmployedFullMonth = new FilteredMeasure<Person, bool>("Count full month", k => k.EmploymentStart.Day == 1, countAll);
+
             var sumSalary = new DecimalSumMeasure<Person>("Sum of Salaries", k => k.Salary);
 
             Console.WriteLine("Building queries");
@@ -53,6 +55,7 @@ namespace dasz.LinqCube.Example
                                     .WithDimension(gender)
                                     .WithDimension(salary)
                                     .WithMeasure(countAll)
+                                    .WithMeasure(countEmployedFullMonth)
                                     .WithMeasure(sumSalary);
 
             var countByOfficeQuery = new Query<Person>("count currently employed by office")
@@ -84,11 +87,13 @@ namespace dasz.LinqCube.Example
                 {
                     foreach (var gPart2 in gPart.Children)
                     {
-                        Console.WriteLine("{0}: {1,12}, M: {2,3} W: {3,3}",
+                        Console.WriteLine("{0}: {1,12}, M: {2,3} W: {3,3}, monthStart: {4,3}",
                             salary.Name,
                             gPart2.Label,
                             result[salaryQuery][year][gPart2][gender]["M"][countAll],
-                            result[salaryQuery][year][gPart2][gender]["F"][countAll]);
+                            result[salaryQuery][year][gPart2][gender]["F"][countAll],
+                            result[salaryQuery][year][gPart2][countEmployedFullMonth]
+                            );
                     }
                 }
                 Console.WriteLine();
