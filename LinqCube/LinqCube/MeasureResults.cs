@@ -9,6 +9,9 @@ namespace dasz.LinqCube
     {
         string Name { get; }
 
+        /// <summary>The number of records that were aggregated to create this result.</summary>
+        int Count { get; }
+
         int IntValue { get; }
         double DoubleValue { get; }
         decimal DecimalValue { get; }
@@ -16,7 +19,7 @@ namespace dasz.LinqCube
         DateTime DateTimeValue { get; }
         TimeSpan TimeSpanValue { get; }
     }
-    
+
     public class DecimalMeasureResult : IMeasureResult
     {
         private decimal _value;
@@ -24,10 +27,13 @@ namespace dasz.LinqCube
         {
             this._value = init;
             this.Measure = measure;
+            this.Count = 0;
         }
 
         public IMeasure Measure { get; private set; }
         public string Name { get { return Measure.Name; } }
+
+        public int Count { get; private set; }
 
         public int IntValue
         {
@@ -57,12 +63,15 @@ namespace dasz.LinqCube
         public void Set(decimal item)
         {
             _value = item;
+            Count += 1;
         }
 
         public override string ToString()
         {
             return _value.ToString();
         }
+
+
     }
 
     public class IntMeasureResult : IMeasureResult
@@ -72,11 +81,13 @@ namespace dasz.LinqCube
         {
             this._value = init;
             this.Measure = measure;
+            this.Count = 0;
         }
 
         public IMeasure Measure { get; private set; }
         public string Name { get { return Measure.Name; } }
 
+        public int Count { get; private set; }
 
         public int IntValue
         {
@@ -106,6 +117,7 @@ namespace dasz.LinqCube
         internal void Set(int item)
         {
             _value = item;
+            Count += 1;
         }
 
         public override string ToString()
