@@ -12,17 +12,17 @@ namespace dasz.LinqCube.Example
         {
             Console.WriteLine("Building dimensions");
             var time = new Dimension<DateTime, Person>("Time", k => k.Birthday)
-                    .BuildYear(1978, 2012)
+                    .BuildYear(1978, Repository.CURRENT_YEAR)
                     .BuildMonths()
                     .Build<DateTime, Person>();
 
             var time_empstart = new Dimension<DateTime, Person>("Time employment start", k => k.EmploymentStart)
-                    .BuildYearSlice(2001, 2011, 1, null, 9, null) // only look at jan-sept
+                    .BuildYearSlice(Repository.MIN_DATE.Year, Repository.CURRENT_YEAR, 1, null, 9, null) // only look at jan-sept
                     .BuildMonths()
                     .Build<DateTime, Person>();
 
             var time_employment = new Dimension<DateTime, Person>("Time employment", k => k.EmploymentStart, k => k.EmploymentEnd ?? DateTime.MaxValue)
-                    .BuildYear(2000, 2011)
+                    .BuildYear(Repository.MIN_DATE.Year, Repository.CURRENT_YEAR)
                     .Build<DateTime, Person>();
 
             var gender = new Dimension<string, Person>("Gender", k => k.Gender)
