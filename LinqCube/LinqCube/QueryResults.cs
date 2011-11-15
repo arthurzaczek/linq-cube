@@ -22,6 +22,7 @@ namespace dasz.LinqCube
 
     public interface IDimensionResult
     {
+        IDimension Dimension { get; }
         DimensionResultEntriesDictionary Entries { get; }
         DimensionResultOtherDimensionsDictionary OtherDimensions { get; }
 
@@ -34,6 +35,9 @@ namespace dasz.LinqCube
     {
         MeasureResultDictionary Values { get; }
         IMeasureResult this[IMeasure key] { get; }
+
+        IDimensionEntryResult ParentCoordinate { get; }
+        IEnumerable<IDimensionEntryResult> CubeCoordinates { get; }
     }
 
     public class DimensionResult<TFact> : IDimensionResult
@@ -46,18 +50,19 @@ namespace dasz.LinqCube
             Measures = measures;
         }
 
+        public IDimension Dimension { get { return this.QueryDimension.Dimension; } }
         public IQueryDimension QueryDimension { get; private set; }
         public DimensionResultEntriesDictionary Entries { get; private set; }
         public DimensionResultOtherDimensionsDictionary OtherDimensions { get; private set; }
         public IEnumerable<IMeasure> Measures { get; private set; }
 
-        public void Initialize(IEnumerable<IQueryDimension> others)
+        public void Initialize(IEnumerable<IQueryDimension> others, IDimensionEntryResult parentCoordinate)
         {
             foreach (var child in QueryDimension.Dimension.Children)
             {
                 var result = new DimensionEntryResult<TFact>(child, Measures);
                 Entries[child] = result;
-                result.Initialize(others);
+                result.Initialize(others, parentCoordinate);
             }
         }
 
@@ -106,26 +111,41 @@ namespace dasz.LinqCube
             Values = new MeasureResultDictionary();
         }
 
+        public IDimension Dimension { get { return this.Entry.Root; } }
         public IDimensionEntry Entry { get; private set; }
         public DimensionResultEntriesDictionary Entries { get; private set; }
         public DimensionResultOtherDimensionsDictionary OtherDimensions { get; private set; }
         public MeasureResultDictionary Values { get; private set; }
         public IEnumerable<IMeasure> Measures { get; private set; }
-
-        public void Initialize(IEnumerable<IQueryDimension> others)
+        public IDimensionEntryResult ParentCoordinate { get; private set; }
+        public IEnumerable<IDimensionEntryResult> CubeCoordinates
         {
+            get
+            {
+                IDimensionEntryResult self = this;
+                while (self != null)
+                {
+                    yield return self;
+                    self = self.ParentCoordinate;
+                }
+            }
+        }
+
+        public void Initialize(IEnumerable<IQueryDimension> others, IDimensionEntryResult parentCoordinate)
+        {
+            ParentCoordinate = parentCoordinate;
             foreach (var child in Entry.Children)
             {
                 var result = new DimensionEntryResult<TFact>(child, Measures);
                 Entries[child] = result;
-                result.Initialize(others);
+                result.Initialize(others, parentCoordinate);
             }
 
             foreach (var other in others)
             {
                 var otherResult = new DimensionResult<TFact>(other, Measures);
                 OtherDimensions[other] = otherResult;
-                otherResult.Initialize(others.Where(i => i != other));
+                otherResult.Initialize(others.Where(i => i != other), this);
             }
 
             foreach (var measure in Measures)

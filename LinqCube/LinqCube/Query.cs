@@ -48,7 +48,7 @@ namespace dasz.LinqCube
 
                 var dimResult = new DimensionResult<TFact>(qDim, Measures);
                 Result[qDim.Dimension] = dimResult;
-                dimResult.Initialize(QueryDimensions.Where(i => i != qDim));
+                dimResult.Initialize(QueryDimensions.Where(i => i != qDim), null);
             }
         }
     }
@@ -103,7 +103,7 @@ namespace dasz.LinqCube
                     // Do something
                     foreach (var kvp in result.Values)
                     {
-                        kvp.Key.Apply(kvp.Value, item);
+                        kvp.Key.Apply(kvp.Value, result, item);
                     }
                     // All other
                     foreach (var otherDim in result.OtherDimensions)

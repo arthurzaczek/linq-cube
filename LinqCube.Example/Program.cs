@@ -22,7 +22,7 @@ namespace dasz.LinqCube.Example
                     .Build<DateTime, Person>();
 
             var time_employment = new Dimension<DateTime, Person>("Time employment", k => k.EmploymentStart, k => k.EmploymentEnd ?? DateTime.MaxValue)
-                    .BuildYear(2001, 2011)
+                    .BuildYear(2000, 2011)
                     .Build<DateTime, Person>();
 
             var gender = new Dimension<string, Person>("Gender", k => k.Gender)
@@ -43,6 +43,30 @@ namespace dasz.LinqCube.Example
 
             var countEmployedFullMonth = new FilteredMeasure<Person, bool>("Count full month", k => k.EmploymentStart.Day == 1, countAll);
 
+            var countStartingEmployment = new CountMeasure<Person>("Count Starting Employment (whole year)", (k, entry) =>
+            {
+                if (entry == null) return false;
+                var dateSlotResult = (DimensionEntryResult<Person>)entry.CubeCoordinates.FirstOrDefault(c => c.Dimension == time_employment);
+                if (dateSlotResult != null)
+                {
+                    var dateSlot = (DimensionEntry<DateTime>)dateSlotResult.Entry;
+                    if (dateSlot != null)
+                    {
+                        var r = dateSlot.Min.Year == k.EmploymentStart.Year;
+                        if (r == false && dateSlot.Min.Year == 2001)
+                        {
+                            Console.WriteLine();
+                        }
+                        return r;
+                    }
+                    else { return false; }
+                }
+                else
+                {
+                    return false;
+                }
+            });
+
             var sumSalary = new DecimalSumMeasure<Person>("Sum of Salaries", k => k.Salary);
 
             Console.WriteLine("Building queries");
@@ -62,12 +86,13 @@ namespace dasz.LinqCube.Example
             var countByOfficeQuery = new Query<Person>("count currently employed by office")
                                     .WithDimension(time_employment)
                                     .WithDimension(offices)
-                                    .WithMeasure(countAll);
+                                    .WithMeasure(countAll)
+                                    .WithMeasure(countStartingEmployment);
 
             CubeResult result;
             using (var ctx = new Repository())
             {
-                result = Cube.Execute(ctx.Persons,
+                result = Cube.Execute(ctx.Persons.OrderBy(x => x.EmploymentStart),
                                 genderAgeQuery,
                                 salaryQuery,
                                 countByOfficeQuery
@@ -91,9 +116,9 @@ namespace dasz.LinqCube.Example
                         Console.WriteLine("{0}: {1,12}, M: {2,3} W: {3,3}, monthStart: {4,3}",
                             salary.Name,
                             gPart2.Label,
-                            result[salaryQuery][year][gPart2][gender]["M"][countAll],
-                            result[salaryQuery][year][gPart2][gender]["F"][countAll],
-                            result[salaryQuery][year][gPart2][countEmployedFullMonth]
+                            result[salaryQuery][year][gPart2][gender]["M"][countAll].IntValue,
+                            result[salaryQuery][year][gPart2][gender]["F"][countAll].IntValue,
+                            result[salaryQuery][year][gPart2][countEmployedFullMonth].IntValue
                             );
                     }
                 }
@@ -116,7 +141,10 @@ namespace dasz.LinqCube.Example
                 var officeCounts = result[countByOfficeQuery][officeEntry];
                 Console.WriteLine("{0,10}|{1}",
                     officeEntry.Label,
-                    string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", officeCounts[c][countAll])).ToArray())
+                    string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", officeCounts[c][countAll].IntValue)).ToArray())
+                );
+                Console.WriteLine("          |{0}",
+                    string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", officeCounts[c][countStartingEmployment].IntValue)).ToArray())
                 );
             }
 
