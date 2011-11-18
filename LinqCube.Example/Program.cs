@@ -16,12 +16,12 @@ namespace dasz.LinqCube.Example
                     .BuildMonths()
                     .Build<DateTime, Person>();
 
-            var time_empstart = new Dimension<DateTime, Person>("Time employment start", k => k.EmploymentStart)
+            var time_empstart = new Dimension<DateTime, Person>("Time employment start", k => k.EmploymentStart.Value, k => k.EmploymentStart.HasValue)
                     .BuildYearSlice(Repository.MIN_DATE.Year, Repository.CURRENT_YEAR, 1, null, 9, null) // only look at jan-sept
                     .BuildMonths()
                     .Build<DateTime, Person>();
 
-            var time_employment = new Dimension<DateTime, Person>("Time employment", k => k.EmploymentStart, k => k.EmploymentEnd ?? DateTime.MaxValue)
+            var time_employment = new Dimension<DateTime, Person>("Time employment", k => k.EmploymentStart.Value, k => k.EmploymentEnd ?? DateTime.MaxValue, k => k.EmploymentStart.HasValue)
                     .BuildYear(Repository.MIN_DATE.Year, Repository.CURRENT_YEAR)
                     .Build<DateTime, Person>();
 
@@ -41,9 +41,9 @@ namespace dasz.LinqCube.Example
             Console.WriteLine("Building measures");
             var countAll = new CountMeasure<Person>("Count", k => true);
 
-            var countEmployedFullMonth = new FilteredMeasure<Person, bool>("Count full month", k => k.EmploymentStart.Day == 1, countAll);
+            var countEmployedFullMonth = new FilteredMeasure<Person, bool>("Count full month", k => k.EmploymentStart.HasValue && k.EmploymentStart.Value.Day == 1, countAll);
 
-            var countStartingEmployment = new CountMeasure<Person>("Count Starting Employment (whole year)", (k, entry) => entry.Count<DateTime>(time_employment, (e) => e.Min.Year == k.EmploymentStart.Year));
+            var countStartingEmployment = new CountMeasure<Person>("Count Starting Employment (whole year)", (k, entry) => entry.Count<DateTime>(time_employment, (e) => k.EmploymentStart.HasValue && e.Min.Year == k.EmploymentStart.Value.Year));
 
             var sumSalary = new DecimalSumMeasure<Person>("Sum of Salaries", k => k.Salary);
 

@@ -34,21 +34,33 @@ namespace dasz.LinqCube
         where TDimension : IComparable
     {
         public Dimension(string name, Func<TFact, TDimension> selector)
-            : this(name, selector, null)
+            : this(name, selector, null, null)
         {
         }
 
         public Dimension(string name, Func<TFact, TDimension> startSelector, Func<TFact, TDimension> endSelector)
+            : this(name, startSelector, endSelector, null)
+        {
+        }
+
+        public Dimension(string name, Func<TFact, TDimension> selector, Func<TFact, bool> filter)
+            : this(name, selector, null, filter)
+        {
+        }
+
+        public Dimension(string name, Func<TFact, TDimension> startSelector, Func<TFact, TDimension> endSelector, Func<TFact, bool> filter)
         {
             this.Name = name;
             Children = new List<DimensionEntry<TDimension>>();
             this.Selector = startSelector;
             this.EndSelector = endSelector;
+            this.Filter = filter;
         }
 
         public string Name { get; private set; }
         public Func<TFact, TDimension> Selector { get; private set; }
         public Func<TFact, TDimension> EndSelector { get; private set; }
+        public Func<TFact, bool> Filter { get; private set; }
 
         public IDimensionParent<TDimension> Parent { get { return null; } }
         public IDimension Root { get { return this; } }

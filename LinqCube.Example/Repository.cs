@@ -10,7 +10,7 @@ namespace dasz.LinqCube.Example
         public int ID { get; set; }
         public string Gender { get; set; }
         public DateTime Birthday { get; set; }
-        public DateTime EmploymentStart { get; set; }
+        public DateTime? EmploymentStart { get; set; }
         public DateTime? EmploymentEnd { get; set; }
         public decimal Salary { get; set; }
         public string Office { get; set; }
@@ -55,12 +55,14 @@ namespace dasz.LinqCube.Example
             _persons = new List<Person>(DATA_COUNT);
             for (int i = 0; i < DATA_COUNT; i++)
             {
-                var empStart = MIN_DATE.AddDays(rnd.Next(3650));
-                DateTime? empEnd = empStart.AddDays(rnd.Next(3650 * 2));
+                DateTime? empStart = MIN_DATE.AddDays(rnd.Next(3650));
+                DateTime? empEnd = empStart.Value.AddDays(rnd.Next(3650 * 2));
                 if (empEnd > DateTime.Today)
                 {
                     empEnd = null;
                 }
+
+                if (rnd.NextDouble() > 0.9) empStart = empEnd = null;
 
                 _persons.Add(new Person()
                 {

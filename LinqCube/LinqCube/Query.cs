@@ -89,13 +89,16 @@ namespace dasz.LinqCube
             {
                 IDimensionEntryResult result = dimResult.Entries[child];
                 var match = false;
-                if (Dimension.EndSelector == null)
+                if (Dimension.Filter == null || Dimension.Filter(item))
                 {
-                    match = child.InRange(Dimension.Selector(item));
-                }
-                else
-                {
-                    match = child.InRange(Dimension.Selector(item), Dimension.EndSelector(item));
+                    if (Dimension.EndSelector == null)
+                    {
+                        match = child.InRange(Dimension.Selector(item));
+                    }
+                    else
+                    {
+                        match = child.InRange(Dimension.Selector(item), Dimension.EndSelector(item));
+                    }
                 }
 
                 if (match)
