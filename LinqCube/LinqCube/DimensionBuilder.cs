@@ -199,5 +199,59 @@ namespace dasz.LinqCube
             }
             return lst.SelectMany(i => i.Children).ToList();
         }
+
+        public static List<DimensionEntry<int>> BuildPartition(this IDimensionParent<int> parent, int stepSize, int lowerLimit, int upperLimit)
+        {
+            if (upperLimit <= lowerLimit) throw new ArgumentOutOfRangeException("upperLimit", "Upper limit must be greater then lower limit");
+            if (stepSize <= 0) throw new ArgumentOutOfRangeException("stepSize", "Stepsize must be > 0");
+
+            var prev = int.MinValue;
+            for (var limit = lowerLimit; limit <= upperLimit; limit += stepSize)
+            {
+                parent.Children.Add(new DimensionEntry<int>(string.Format("{0} - {1}", prev != int.MinValue ? prev.ToString() : string.Empty, limit), parent)
+                {
+                    Min = prev,
+                    Max = limit
+                });
+                prev = limit;
+            }
+            parent.Children.Add(new DimensionEntry<int>(string.Format("{0} - ", prev), parent)
+            {
+                Min = prev,
+                Max = int.MaxValue
+            });
+
+            return parent.Children;
+        }
+
+        public static List<DimensionEntry<int>> BuildPartition(this List<DimensionEntry<int>> lst, int stepSize)
+        {
+            foreach (var parent in lst)
+            {
+                if (parent.Min != int.MinValue && parent.Max != int.MaxValue)
+                {
+                    var prev = parent.Min;
+                    for (var limit = prev + stepSize; limit <= parent.Max; limit += stepSize)
+                    {
+                        parent.Children.Add(new DimensionEntry<int>(string.Format("{0} - {1}", prev, limit), parent)
+                        {
+                            Min = prev,
+                            Max = limit
+                        });
+                        prev = limit;
+                    }
+                }
+                else
+                {
+                    parent.Children.Add(new DimensionEntry<int>(parent.Label, parent)
+                    {
+                        Min = parent.Min,
+                        Max = parent.Max
+                    });
+                }
+
+            }
+            return lst.SelectMany(i => i.Children).ToList();
+        }
     }
 }
