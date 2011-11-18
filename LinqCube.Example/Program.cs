@@ -30,7 +30,7 @@ namespace dasz.LinqCube.Example
                     .Build<string, Person>();
 
             var salary = new Dimension<decimal, Person>("Salary", k => k.Salary)
-                    .BuildPartition(500, 1000, 2500)
+                    .BuildPartition(500, 1000, 2500, "up to {0}", "{0} up to {1}", "{0} and more")
                     .BuildPartition(100)
                     .Build<decimal, Person>();
 
@@ -91,7 +91,7 @@ namespace dasz.LinqCube.Example
                 {
                     foreach (var gPart2 in gPart.Children)
                     {
-                        Console.WriteLine("{0}: {1,12}, M: {2,3} W: {3,3}, monthStart: {4,3}",
+                        Console.WriteLine("{0}: {1,13}, M: {2,3} W: {3,3}, monthStart: {4,3}",
                             salary.Name,
                             gPart2.Label,
                             result[salaryQuery][year][gPart2][gender]["M"][countAll].IntValue,

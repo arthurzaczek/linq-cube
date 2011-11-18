@@ -146,30 +146,57 @@ namespace dasz.LinqCube
             return lst.SelectMany(i => i.Children).ToList();
         }
 
-        public static List<DimensionEntry<decimal>> BuildPartition(this IDimensionParent<decimal> parent, decimal stepSize, decimal lowerLimit, decimal upperLimit)
+        private static List<DimensionEntry<T>> BuildPartition<T>(IDimensionParent<T> parent, T stepSize, T lowerLimit, T upperLimit, Func<T, T, T> add, T minValue, T maxValue, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
+            where T : IComparable
         {
-            if (upperLimit <= lowerLimit) throw new ArgumentOutOfRangeException("upperLimit", "Upper limit must be greater then lower limit");
-            if (stepSize <= 0) throw new ArgumentOutOfRangeException("stepSize", "Stepsize must be > 0");
+            if (upperLimit.CompareTo(lowerLimit) <= 0) throw new ArgumentOutOfRangeException("upperLimit", "Upper limit must be greater then lower limit");
+            if (stepSize.CompareTo(default(T)) <= 0) throw new ArgumentOutOfRangeException("stepSize", "Stepsize must be > 0");
 
-            var prev = decimal.MinValue;
-            for (var limit = lowerLimit; limit <= upperLimit; limit += stepSize)
+            var prev = minValue;
+            for (var limit = lowerLimit; limit.CompareTo(upperLimit) <= 0; limit = add(limit, stepSize))
             {
-                parent.Children.Add(new DimensionEntry<decimal>(string.Format("{0} - {1}", prev != decimal.MinValue ? prev.ToString() : string.Empty, limit), parent)
+                var label = prev.CompareTo(minValue) == 0
+                    ? string.Format(lowerLabelFormat, limit)
+                    : string.Format(defaultLabelFormat, prev, limit);
+
+                parent.Children.Add(new DimensionEntry<T>(label, parent)
                 {
                     Min = prev,
                     Max = limit
                 });
                 prev = limit;
             }
-            parent.Children.Add(new DimensionEntry<decimal>(string.Format("{0} - ", prev), parent)
+            parent.Children.Add(new DimensionEntry<T>(string.Format(upperLabelFormat, prev), parent)
             {
                 Min = prev,
-                Max = decimal.MaxValue
+                Max = maxValue
             });
 
             return parent.Children;
         }
 
+
+        public static List<DimensionEntry<decimal>> BuildPartition(this IDimensionParent<decimal> parent, decimal stepSize, decimal lowerLimit, decimal upperLimit)
+        {
+            return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, decimal.MinValue, decimal.MaxValue, "- {0}", "{0} - {1}", "{0} -");
+        }
+
+        public static List<DimensionEntry<int>> BuildPartition(this IDimensionParent<int> parent, int stepSize, int lowerLimit, int upperLimit)
+        {
+            return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, int.MinValue, int.MaxValue, "- {0}", "{0} - {1}", "{0} -");
+        }
+
+        public static List<DimensionEntry<decimal>> BuildPartition(this IDimensionParent<decimal> parent, decimal stepSize, decimal lowerLimit, decimal upperLimit, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
+        {
+            return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, decimal.MinValue, decimal.MaxValue, lowerLabelFormat, defaultLabelFormat, upperLabelFormat);
+        }
+
+        public static List<DimensionEntry<int>> BuildPartition(this IDimensionParent<int> parent, int stepSize, int lowerLimit, int upperLimit, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
+        {
+            return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, int.MinValue, int.MaxValue, lowerLabelFormat, defaultLabelFormat, upperLabelFormat);
+        }
+
+        // TODO: refactor the methods below like the BuildPartitions above
         public static List<DimensionEntry<decimal>> BuildPartition(this List<DimensionEntry<decimal>> lst, decimal stepSize)
         {
             foreach (var parent in lst)
@@ -198,30 +225,6 @@ namespace dasz.LinqCube
 
             }
             return lst.SelectMany(i => i.Children).ToList();
-        }
-
-        public static List<DimensionEntry<int>> BuildPartition(this IDimensionParent<int> parent, int stepSize, int lowerLimit, int upperLimit)
-        {
-            if (upperLimit <= lowerLimit) throw new ArgumentOutOfRangeException("upperLimit", "Upper limit must be greater then lower limit");
-            if (stepSize <= 0) throw new ArgumentOutOfRangeException("stepSize", "Stepsize must be > 0");
-
-            var prev = int.MinValue;
-            for (var limit = lowerLimit; limit <= upperLimit; limit += stepSize)
-            {
-                parent.Children.Add(new DimensionEntry<int>(string.Format("{0} - {1}", prev != int.MinValue ? prev.ToString() : string.Empty, limit), parent)
-                {
-                    Min = prev,
-                    Max = limit
-                });
-                prev = limit;
-            }
-            parent.Children.Add(new DimensionEntry<int>(string.Format("{0} - ", prev), parent)
-            {
-                Min = prev,
-                Max = int.MaxValue
-            });
-
-            return parent.Children;
         }
 
         public static List<DimensionEntry<int>> BuildPartition(this List<DimensionEntry<int>> lst, int stepSize)
