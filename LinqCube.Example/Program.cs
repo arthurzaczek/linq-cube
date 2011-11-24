@@ -83,13 +83,13 @@ namespace dasz.LinqCube.Example
             Console.WriteLine(salaryQuery.Name);
             Console.WriteLine("==================");
             Console.WriteLine();
-            foreach (var year in time_empstart.Children)
+            foreach (var year in time_empstart)
             {
                 Console.WriteLine(year.Label);
                 Console.WriteLine("==================");
-                foreach (var gPart in salary.Children)
+                foreach (var gPart in salary)
                 {
-                    foreach (var gPart2 in gPart.Children)
+                    foreach (var gPart2 in gPart)
                     {
                         Console.WriteLine("{0}: {1,13}, M: {2,3} W: {3,3}, monthStart: {4,3}",
                             salary.Name,
@@ -114,7 +114,7 @@ namespace dasz.LinqCube.Example
                 string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", c.Label)).ToArray())
             );
             Console.WriteLine("----------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------");
-            foreach (var officeEntry in offices.Children)
+            foreach (var officeEntry in offices)
             {
                 var officeCounts = result[countByOfficeQuery][officeEntry];
                 Console.WriteLine("{0,10}|{1}",

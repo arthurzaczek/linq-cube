@@ -13,13 +13,13 @@ namespace dasz.LinqCube
         List<DimensionEntry<TDimension>> Children { get; }
     }
 
-    public interface IDimension
+    public interface IDimension : IEnumerable<IDimensionEntry>
     {
         string Name { get; }
         IEnumerable<IDimensionEntry> Children { get; }
     }
 
-    public interface IDimensionEntry
+    public interface IDimensionEntry : IEnumerable<IDimensionEntry>
     {
         string Label { get; }
         IEnumerable<IDimensionEntry> Children { get; }
@@ -70,6 +70,16 @@ namespace dasz.LinqCube
         public override string ToString()
         {
             return "Dim: " + Name;
+        }
+
+        public IEnumerator<IDimensionEntry> GetEnumerator()
+        {
+            return Children.Cast<IDimensionEntry>().GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return Children.GetEnumerator();
         }
     }
 
@@ -166,6 +176,16 @@ namespace dasz.LinqCube
         IDimensionEntry IDimensionEntry.Parent
         {
             get { return Parent as IDimensionEntry; }
+        }
+
+        public IEnumerator<IDimensionEntry> GetEnumerator()
+        {
+            return Children.Cast<IDimensionEntry>().GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return Children.GetEnumerator();
         }
     }
 }
