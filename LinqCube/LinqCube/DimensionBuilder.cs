@@ -137,6 +137,24 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
+        public static List<DimensionEntry<TEnum>> BuildEnum<TEnum>(this IDimensionParent<TEnum> parent)
+            where TEnum : struct, IComparable
+        {
+            var enumType = typeof(TEnum);
+            if (!enumType.IsEnum) throw new ArgumentOutOfRangeException("TEnum", "is no enumeration");
+
+            foreach (var e in Enum.GetValues(enumType))
+            {
+                TEnum value = (TEnum)e;
+                parent.Children.Add(new DimensionEntry<TEnum>(e.ToString(), parent)
+                {
+                    Value = value
+                });
+            }
+
+            return parent.Children;
+        }
+
         public static List<DimensionEntry<string>> BuildEnum(this List<DimensionEntry<string>> lst)
         {
             foreach (var parent in lst)
