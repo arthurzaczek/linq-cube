@@ -5,7 +5,7 @@ using System.Text;
 
 namespace dasz.LinqCube
 {
-    public class QueryResult : Dictionary<IDimension, IDimensionResult>
+    public class QueryResult : Dictionary<IDimension, IDimensionEntryResult>
     {
         public QueryResult()
         {
@@ -15,23 +15,12 @@ namespace dasz.LinqCube
         {
             get
             {
-                return this[key.Root][key];
+                return ((IDictionary<IDimension, IDimensionEntryResult>)this)[key.Root][key];
             }
         }
     }
 
-    public interface IDimensionResult
-    {
-        IDimension Dimension { get; }
-        DimensionResultEntriesDictionary Entries { get; }
-        DimensionResultOtherDimensionsDictionary OtherDimensions { get; }
-
-        IDimensionResult this[IDimension key] { get; }
-        IDimensionEntryResult this[IDimensionEntry key] { get; }
-        IDimensionEntryResult this[string key] { get; }
-    }
-
-    public interface IDimensionEntryResult : IDimensionResult
+    public interface IDimensionEntryResult
     {
         IDimensionEntry DimensionEntry { get; }
 
@@ -40,66 +29,17 @@ namespace dasz.LinqCube
 
         IDimensionEntryResult ParentCoordinate { get; }
         IEnumerable<IDimensionEntryResult> CubeCoordinates { get; }
+
+        DimensionResultOtherDimensionsDictionary OtherDimensions { get; }
+        DimensionResultEntriesDictionary Entries { get; }
+
+        IDimensionEntryResult this[IDimensionEntry key] { get; }
+        IDimensionEntryResult this[string key] { get; }
     }
 
-    public class DimensionResult<TFact> : IDimensionResult
+    public interface IDimensionResult : IDimensionEntryResult
     {
-        public DimensionResult(IQueryDimension dim, IEnumerable<IMeasure> measures)
-        {
-            QueryDimension = dim;
-            Entries = new DimensionResultEntriesDictionary();
-            OtherDimensions = new DimensionResultOtherDimensionsDictionary();
-            Measures = measures;
-        }
-
-        public IDimension Dimension { get { return this.QueryDimension.Dimension; } }
-        public IQueryDimension QueryDimension { get; private set; }
-        public DimensionResultEntriesDictionary Entries { get; private set; }
-        public DimensionResultOtherDimensionsDictionary OtherDimensions { get; private set; }
-        public IEnumerable<IMeasure> Measures { get; private set; }
-
-        public void Initialize(IEnumerable<IQueryDimension> others, IDimensionEntryResult parentCoordinate)
-        {
-            foreach (var child in QueryDimension.Dimension.Children)
-            {
-                var result = new DimensionEntryResult<TFact>(child, Measures);
-                Entries[child] = result;
-                result.Initialize(others, parentCoordinate);
-            }
-        }
-
-        public IDimensionResult this[IDimension key]
-        {
-            get
-            {
-                return OtherDimensions[key];
-            }
-        }
-
-        public IDimensionEntryResult this[string key]
-        {
-            get
-            {
-                return Entries[key];
-            }
-        }
-
-        public IDimensionEntryResult this[IDimensionEntry key]
-        {
-            get
-            {
-                IDimensionEntryResult result;
-                if (Entries.TryGetValue(key, out result))
-                {
-                    return result;
-                }
-                else
-                {
-                    if (key.Parent == null) throw new ArgumentOutOfRangeException("key", "key does not match dimension");
-                    return this[key.Parent][key];
-                }
-            }
-        }
+        IDimension Dimension { get; }
     }
 
     public class DimensionEntryResult<TFact> : IDimensionEntryResult
@@ -156,14 +96,6 @@ namespace dasz.LinqCube
             }
         }
 
-        public IDimensionResult this[IDimension key]
-        {
-            get
-            {
-                return OtherDimensions[key];
-            }
-        }
-
         public IDimensionEntryResult this[string key]
         {
             get
@@ -177,7 +109,11 @@ namespace dasz.LinqCube
             get
             {
                 IDimensionEntryResult result;
-                if (Entries.TryGetValue(key, out result))
+                if (this.DimensionEntry == key)
+                {
+                    return this;
+                }
+                else if (Entries.TryGetValue(key, out result))
                 {
                     return result;
                 }
@@ -212,13 +148,24 @@ namespace dasz.LinqCube
         }
     }
 
+    public class DimensionResult<TFact> : DimensionEntryResult<TFact>, IDimensionResult
+    {
+        public DimensionResult(IQueryDimension dim, IEnumerable<IMeasure> measures)
+            : base(dim.Dimension, measures)
+        {
+            QueryDimension = dim;
+        }
+
+        public IQueryDimension QueryDimension { get; private set; }
+    }
+
     public static class DimensionEntryResultExtensions
     {
         public static bool Count<TDimension>(this IDimensionEntryResult current, IDimension dim, Func<DimensionEntry<TDimension>, bool> selector)
             where TDimension : IComparable
         {
             if (current == null) return false;
-            var dimEntryResult = current.CubeCoordinates.FirstOrDefault(c => c.Dimension == dim);
+            var dimEntryResult = current.CubeCoordinates.FirstOrDefault(c => c.DimensionEntry.Root == dim);
             if (dimEntryResult != null)
             {
                 var dimEntry = (DimensionEntry<TDimension>)dimEntryResult.DimensionEntry;

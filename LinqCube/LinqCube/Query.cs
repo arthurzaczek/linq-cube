@@ -47,7 +47,7 @@ namespace dasz.LinqCube
                 qDim.AddMeasures(Measures);
 
                 var dimResult = new DimensionResult<TFact>(qDim, Measures);
-                Result[qDim.Dimension] = dimResult;
+                ((IDictionary<IDimension, IDimensionEntryResult>)Result)[qDim.Dimension] = dimResult;
                 dimResult.Initialize(QueryDimensions.Where(i => i != qDim), null);
             }
         }
@@ -55,7 +55,7 @@ namespace dasz.LinqCube
 
     public interface IQueryDimension
     {
-        void Apply(object item, IDimensionResult dimResult);
+        void Apply(object item, IDimensionEntryResult dimResult);
         IDimension Dimension { get; }
 
         void AddMeasures(List<IMeasure> measures);
@@ -78,42 +78,41 @@ namespace dasz.LinqCube
             this.Measures = measures;
         }
 
-        public void Apply(object item, IDimensionResult dimResult)
+        public void Apply(object item, IDimensionEntryResult dimResult)
         {
             Apply((TFact)item, Dimension, dimResult);
         }
 
-        private void Apply(TFact item, IDimensionParent<TDimension> parent, IDimensionResult dimResult)
+        private void Apply(TFact item, DimensionEntry<TDimension> entry, IDimensionEntryResult result)
         {
-            foreach (DimensionEntry<TDimension> child in parent.Children)
+            var match = false;
+            if (Dimension.Filter == null || Dimension.Filter(item))
             {
-                IDimensionEntryResult result = dimResult.Entries[child];
-                var match = false;
-                if (Dimension.Filter == null || Dimension.Filter(item))
+                if (Dimension.EndSelector == null)
                 {
-                    if (Dimension.EndSelector == null)
-                    {
-                        match = child.InRange(Dimension.Selector(item));
-                    }
-                    else
-                    {
-                        match = child.InRange(Dimension.Selector(item), Dimension.EndSelector(item));
-                    }
+                    match = entry.InRange(Dimension.Selector(item));
                 }
-
-                if (match)
+                else
                 {
-                    // Do something
-                    foreach (var kvp in result.Values)
-                    {
-                        kvp.Key.Apply(kvp.Value, result, item);
-                    }
-                    // All other
-                    foreach (var otherDim in result.OtherDimensions)
-                    {
-                        otherDim.Key.Apply(item, otherDim.Value);
-                    }
-                    Apply(item, child, result);
+                    match = entry.InRange(Dimension.Selector(item), Dimension.EndSelector(item));
+                }
+            }
+
+            if (match)
+            {
+                // Do something
+                foreach (var kvp in result.Values)
+                {
+                    kvp.Key.Apply(kvp.Value, result, item);
+                }
+                // All other
+                foreach (var otherDim in result.OtherDimensions)
+                {
+                    otherDim.Key.Apply(item, otherDim.Value);
+                }
+                foreach (DimensionEntry<TDimension> child in entry.Children)
+                {
+                    Apply(item, child, result.Entries[child]);
                 }
             }
         }

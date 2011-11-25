@@ -5,20 +5,6 @@ using System.Text;
 
 namespace dasz.LinqCube
 {
-    public interface IDimensionParent<TDimension>
-        where TDimension : IComparable
-    {
-        IDimensionParent<TDimension> Parent { get; }
-        IDimension Root { get; }
-        List<DimensionEntry<TDimension>> Children { get; }
-    }
-
-    public interface IDimension : IEnumerable<IDimensionEntry>
-    {
-        string Name { get; }
-        IEnumerable<IDimensionEntry> Children { get; }
-    }
-
     public interface IDimensionEntry : IEnumerable<IDimensionEntry>
     {
         string Label { get; }
@@ -27,68 +13,17 @@ namespace dasz.LinqCube
         IDimension Root { get; }
     }
 
-    /// <summary>
-    /// Dimension descriptor, 
-    /// </summary>
-    public class Dimension<TDimension, TFact> : IDimensionParent<TDimension>, IDimension
-        where TDimension : IComparable
+    public interface IDimension : IDimensionEntry
     {
-        public Dimension(string name, Func<TFact, TDimension> selector)
-            : this(name, selector, null, null)
-        {
-        }
-
-        public Dimension(string name, Func<TFact, TDimension> startSelector, Func<TFact, TDimension> endSelector)
-            : this(name, startSelector, endSelector, null)
-        {
-        }
-
-        public Dimension(string name, Func<TFact, TDimension> selector, Func<TFact, bool> filter)
-            : this(name, selector, null, filter)
-        {
-        }
-
-        public Dimension(string name, Func<TFact, TDimension> startSelector, Func<TFact, TDimension> endSelector, Func<TFact, bool> filter)
-        {
-            this.Name = name;
-            Children = new List<DimensionEntry<TDimension>>();
-            this.Selector = startSelector;
-            this.EndSelector = endSelector;
-            this.Filter = filter;
-        }
-
-        public string Name { get; private set; }
-        public Func<TFact, TDimension> Selector { get; private set; }
-        public Func<TFact, TDimension> EndSelector { get; private set; }
-        public Func<TFact, bool> Filter { get; private set; }
-
-        public IDimensionParent<TDimension> Parent { get { return null; } }
-        public IDimension Root { get { return this; } }
-        public List<DimensionEntry<TDimension>> Children { get; private set; }
-        IEnumerable<IDimensionEntry> IDimension.Children { get { return Children.Cast<IDimensionEntry>(); } }
-
-        public override string ToString()
-        {
-            return "Dim: " + Name;
-        }
-
-        public IEnumerator<IDimensionEntry> GetEnumerator()
-        {
-            return Children.Cast<IDimensionEntry>().GetEnumerator();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return Children.GetEnumerator();
-        }
+        string Name { get; }
     }
 
-    public class DimensionEntry<TDimension> : IDimensionParent<TDimension>, IDimensionEntry
+    public class DimensionEntry<TDimension> : IDimensionEntry
         where TDimension : IComparable
     {
-        public DimensionEntry(string label, IDimensionParent<TDimension> parent)
+        public DimensionEntry(string label, DimensionEntry<TDimension> parent)
         {
-            this.Parent = parent;
+            this._parent = parent;
             this.Label = label;
             Children = new List<DimensionEntry<TDimension>>();
         }
@@ -98,15 +33,16 @@ namespace dasz.LinqCube
         /// <summary>
         /// Min Value, incl.
         /// </summary>
-        public TDimension Min { get; set; }
+        public virtual TDimension Min { get; set; }
 
         /// <summary>
         /// Max Value, excl.
         /// </summary>
-        public TDimension Max { get; set; }
+        public virtual TDimension Max { get; set; }
 
         private TDimension _value;
-        private bool hasValue = false;
+        protected bool hasValue { get; private set; }
+
         /// <summary>
         /// Distinct value
         /// </summary>
@@ -120,14 +56,20 @@ namespace dasz.LinqCube
             {
                 _value = value;
                 hasValue = true;
+                if (_parent != null) _parent.hasValue = true;
             }
         }
 
-        public bool InRange(TDimension value)
+        public virtual bool InRange(TDimension value)
         {
             if (hasValue)
             {
-                return Value.CompareTo(value) == 0;
+                if (Value == null && value == null)
+                    return true;
+                else if (Value == null)
+                    return false;
+                else
+                    return Value.CompareTo(value) == 0;
             }
             else
             {
@@ -135,7 +77,7 @@ namespace dasz.LinqCube
             }
         }
 
-        internal bool InRange(TDimension lower, TDimension upper)
+        public bool InRange(TDimension lower, TDimension upper)
         {
             if (hasValue)
             {
@@ -148,8 +90,9 @@ namespace dasz.LinqCube
             }
         }
 
-        public IDimensionParent<TDimension> Parent { get; private set; }
-        public IDimension Root { get { return Parent.Root; } }
+        private DimensionEntry<TDimension> _parent;
+        public IDimensionEntry Parent { get { return _parent; } }
+        public virtual IDimension Root { get { return Parent.Root; } }
         public List<DimensionEntry<TDimension>> Children { get; private set; }
         IEnumerable<IDimensionEntry> IDimensionEntry.Children { get { return Children.Cast<IDimensionEntry>(); } }
 
@@ -186,6 +129,81 @@ namespace dasz.LinqCube
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return Children.GetEnumerator();
+        }
+    }
+
+    /// <summary>
+    /// Dimension descriptor, 
+    /// </summary>
+    public class Dimension<TDimension, TFact> : DimensionEntry<TDimension>, IDimension
+        where TDimension : IComparable
+    {
+        public Dimension(string name, Func<TFact, TDimension> selector)
+            : this(name, selector, null, null)
+        {
+        }
+
+        public Dimension(string name, Func<TFact, TDimension> startSelector, Func<TFact, TDimension> endSelector)
+            : this(name, startSelector, endSelector, null)
+        {
+        }
+
+        public Dimension(string name, Func<TFact, TDimension> selector, Func<TFact, bool> filter)
+            : this(name, selector, null, filter)
+        {
+        }
+
+        public Dimension(string name, Func<TFact, TDimension> startSelector, Func<TFact, TDimension> endSelector, Func<TFact, bool> filter)
+            : base(name, null)
+        {
+            this.Name = name;
+            this.Selector = startSelector;
+            this.EndSelector = endSelector;
+            this.Filter = filter;
+        }
+
+        public string Name { get; private set; }
+        public Func<TFact, TDimension> Selector { get; private set; }
+        public Func<TFact, TDimension> EndSelector { get; private set; }
+        public Func<TFact, bool> Filter { get; private set; }
+
+        public override string ToString()
+        {
+            return "Dim: " + Name;
+        }
+
+        public override IDimension Root { get { return this; } }
+
+        public override TDimension Min
+        {
+            get
+            {
+                return Children.First().Min;
+            }
+            set
+            {
+                throw new NotSupportedException("Cannot set lower boundary value on basic dimension");
+            }
+        }
+
+        public override TDimension Max
+        {
+            get
+            {
+                return Children.Last().Max;
+            }
+            set
+            {
+                throw new NotSupportedException("Cannot set upper boundary value on basic dimension");
+            }
+        }
+
+        public override bool InRange(TDimension value)
+        {
+            if (hasValue)
+                return true;
+            else
+                return base.InRange(value);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace dasz.LinqCube
             return (Dimension<TDimension, TFact>)lst.First().Root;
         }
 
-        public static List<DimensionEntry<DateTime>> BuildYear(this IDimensionParent<DateTime> parent, int fromYear, int thruYear)
+        public static List<DimensionEntry<DateTime>> BuildYear(this DimensionEntry<DateTime> parent, int fromYear, int thruYear)
         {
             for (int year = fromYear; year <= thruYear; year++)
             {
@@ -30,7 +30,7 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
-        public static List<DimensionEntry<DateTime>> BuildYearRange(this IDimensionParent<DateTime> parent, DateTime from, DateTime thruDay)
+        public static List<DimensionEntry<DateTime>> BuildYearRange(this DimensionEntry<DateTime> parent, DateTime from, DateTime thruDay)
         {
             if (from != from.Date) throw new ArgumentOutOfRangeException("from", "contains time component");
             if (thruDay != thruDay.Date) throw new ArgumentOutOfRangeException("thruDay", "contains time component");
@@ -43,7 +43,7 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
-        public static List<DimensionEntry<DateTime>> BuildYearSlice(this IDimensionParent<DateTime> parent, int fromYear, int thruYear, int sliceFromMonth, int? sliceFromDay, int sliceThruMonth, int? sliceThruDay)
+        public static List<DimensionEntry<DateTime>> BuildYearSlice(this DimensionEntry<DateTime> parent, int fromYear, int thruYear, int sliceFromMonth, int? sliceFromDay, int sliceThruMonth, int? sliceThruDay)
         {
             for (int year = fromYear; year <= thruYear; year++)
             {
@@ -124,7 +124,7 @@ namespace dasz.LinqCube
             return lst.SelectMany(i => i.Children).ToList();
         }
 
-        public static List<DimensionEntry<string>> BuildEnum(this IDimensionParent<string> parent, params string[] entries)
+        public static List<DimensionEntry<string>> BuildEnum(this DimensionEntry<string> parent, params string[] entries)
         {
             foreach (var e in entries)
             {
@@ -137,7 +137,7 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
-        public static List<DimensionEntry<TEnum>> BuildEnum<TEnum>(this IDimensionParent<TEnum> parent)
+        public static List<DimensionEntry<TEnum>> BuildEnum<TEnum>(this DimensionEntry<TEnum> parent)
             where TEnum : struct, IComparable
         {
             var enumType = typeof(TEnum);
@@ -164,7 +164,7 @@ namespace dasz.LinqCube
             return lst.SelectMany(i => i.Children).ToList();
         }
 
-        private static List<DimensionEntry<T>> BuildPartition<T>(IDimensionParent<T> parent, T stepSize, T lowerLimit, T upperLimit, Func<T, T, T> add, T minValue, T maxValue, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
+        private static List<DimensionEntry<T>> BuildPartition<T>(DimensionEntry<T> parent, T stepSize, T lowerLimit, T upperLimit, Func<T, T, T> add, T minValue, T maxValue, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
             where T : IComparable
         {
             if (upperLimit.CompareTo(lowerLimit) <= 0) throw new ArgumentOutOfRangeException("upperLimit", "Upper limit must be greater then lower limit");
@@ -194,22 +194,22 @@ namespace dasz.LinqCube
         }
 
 
-        public static List<DimensionEntry<decimal>> BuildPartition(this IDimensionParent<decimal> parent, decimal stepSize, decimal lowerLimit, decimal upperLimit)
+        public static List<DimensionEntry<decimal>> BuildPartition(this DimensionEntry<decimal> parent, decimal stepSize, decimal lowerLimit, decimal upperLimit)
         {
             return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, decimal.MinValue, decimal.MaxValue, "- {0}", "{0} - {1}", "{0} -");
         }
 
-        public static List<DimensionEntry<int>> BuildPartition(this IDimensionParent<int> parent, int stepSize, int lowerLimit, int upperLimit)
+        public static List<DimensionEntry<int>> BuildPartition(this DimensionEntry<int> parent, int stepSize, int lowerLimit, int upperLimit)
         {
             return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, int.MinValue, int.MaxValue, "- {0}", "{0} - {1}", "{0} -");
         }
 
-        public static List<DimensionEntry<decimal>> BuildPartition(this IDimensionParent<decimal> parent, decimal stepSize, decimal lowerLimit, decimal upperLimit, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
+        public static List<DimensionEntry<decimal>> BuildPartition(this DimensionEntry<decimal> parent, decimal stepSize, decimal lowerLimit, decimal upperLimit, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
         {
             return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, decimal.MinValue, decimal.MaxValue, lowerLabelFormat, defaultLabelFormat, upperLabelFormat);
         }
 
-        public static List<DimensionEntry<int>> BuildPartition(this IDimensionParent<int> parent, int stepSize, int lowerLimit, int upperLimit, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
+        public static List<DimensionEntry<int>> BuildPartition(this DimensionEntry<int> parent, int stepSize, int lowerLimit, int upperLimit, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
         {
             return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, int.MinValue, int.MaxValue, lowerLabelFormat, defaultLabelFormat, upperLabelFormat);
         }
