@@ -12,6 +12,9 @@ namespace dasz.LinqCube
         /// <summary>The number of records that were aggregated to create this result.</summary>
         int Count { get; }
 
+        /// <summary>The aggregated value devided by the count of records.</summary>
+        double Average { get; }
+
         int IntValue { get; }
         double DoubleValue { get; }
         decimal DecimalValue { get; }
@@ -34,6 +37,8 @@ namespace dasz.LinqCube
         public string Name { get { return Measure.Name; } }
 
         public int Count { get; private set; }
+
+        public double Average { get { return Count == 0 ? 0 : (double)_value / (double)Count; } }
 
         public int IntValue
         {
@@ -87,6 +92,8 @@ namespace dasz.LinqCube
 
         public int Count { get; private set; }
 
+        public double Average { get { return Count == 0 ? 0 : (double)_value / (double)Count; } }
+
         public int IntValue
         {
             get { return (int)_value; }
@@ -138,6 +145,8 @@ namespace dasz.LinqCube
         public string Name { get { return Measure.Name; } }
 
         public int Count { get; private set; }
+
+        public double Average { get { return Count == 0 ? 0 : (double)_value / (double)Count; } }
 
         public int IntValue
         {
