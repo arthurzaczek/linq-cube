@@ -73,21 +73,35 @@ namespace dasz.LinqCube
             }
         }
 
-        public void Initialize(IEnumerable<IQueryDimension> others, IDimensionEntryResult parentCoordinate)
+        public void Initialize(IEnumerable<IQueryDimension> primaryDimensions, IEnumerable<IQueryDimension> secondaryDimensions, IDimensionEntryResult parentCoordinate)
         {
             ParentCoordinate = parentCoordinate;
             foreach (var child in DimensionEntry.Children)
             {
                 var result = new DimensionEntryResult<TFact>(child, Measures);
                 Entries[child] = result;
-                result.Initialize(others, parentCoordinate);
+                result.Initialize(primaryDimensions, secondaryDimensions, parentCoordinate);
             }
 
-            foreach (var other in others)
+            var nextDim = primaryDimensions == null ? null : primaryDimensions.FirstOrDefault();
+            if (nextDim != null)
             {
-                var otherResult = new DimensionResult<TFact>(other, Measures);
-                OtherDimensions[other] = otherResult;
-                otherResult.Initialize(others.Where(i => i != other), this);
+                // we have a "next" primary dimension.
+                // Create result and recurse initialisation
+                var nextResult = new DimensionResult<TFact>(nextDim, Measures);
+                OtherDimensions[nextDim] = nextResult;
+                nextResult.Initialize(primaryDimensions.Skip(1), secondaryDimensions, this);
+            }
+            else
+            {
+                // no primary dimensions left
+                // generate all secondary permutations
+                foreach (var other in secondaryDimensions)
+                {
+                    var otherResult = new DimensionResult<TFact>(other, Measures);
+                    OtherDimensions[other] = otherResult;
+                    otherResult.Initialize(null, secondaryDimensions.Where(i => i != other), this);
+                }
             }
 
             foreach (var measure in Measures)

@@ -16,13 +16,35 @@ namespace dasz.LinqCube
         public string Name { get; private set; }
         public QueryResult Result { get; private set; }
 
-        internal List<IQueryDimension> QueryDimensions { get; private set; }
+        /// <summary>
+        /// The list of primary dimensions. These dimensions can only be accessed in the order of their definition.
+        /// </summary>
+        /// <remarks>
+        /// The runtime of a query is in the order of the product of all entry-counts.
+        /// </remarks>
+        internal List<IQueryDimension> PrimaryQueryDimensions { get; private set; }
+
+        /// <summary>
+        /// The list of secondary dimensions. These dimensions can only be accessed in any order after all primary dimensions were walked.
+        /// </summary>
+        /// <remarks>
+        /// The runtime of a query is O(n^d), where d is the number of secondary query dimensions.
+        /// </remarks>
+        internal List<IQueryDimension> SecondaryQueryDimensions { get; private set; }
+
+        /// <summary>
+        /// The list of top-level query dimensions. This is initialised together with the QueryResult and is used to decouple the executor from the primary/secondary distinction.
+        /// </summary>
+        private List<IQueryDimension> TopLevelQueryDimensions;
+
         public List<IMeasure> Measures { get; private set; }
 
         public Query(string name)
         {
             Name = name;
-            QueryDimensions = new List<IQueryDimension>();
+            PrimaryQueryDimensions = new List<IQueryDimension>();
+            SecondaryQueryDimensions = new List<IQueryDimension>();
+            TopLevelQueryDimensions = new List<IQueryDimension>();
             Measures = new List<IMeasure>();
         }
 
@@ -31,10 +53,10 @@ namespace dasz.LinqCube
             if (Measures.Count == 0) throw new InvalidOperationException("No measures added");
             if (Result == null) throw new InvalidOperationException("Not initialized yet: no result created");
 
-            foreach (IQueryDimension dim in QueryDimensions)
+            foreach (IQueryDimension qDim in TopLevelQueryDimensions)
             {
-                var dimResult = Result[dim.Dimension];
-                dim.Apply(item, dimResult);
+                var dimResult = Result[qDim.Dimension];
+                qDim.Apply(item, dimResult);
             }
         }
 
@@ -42,13 +64,31 @@ namespace dasz.LinqCube
         {
             Result = new QueryResult();
 
-            foreach (var qDim in QueryDimensions)
+            if (PrimaryQueryDimensions.Count > 0)
             {
+                // we have a primary dimension.
+                // Create result and recurse initialisation
+                var qDim = PrimaryQueryDimensions.First();
+                TopLevelQueryDimensions.Add(qDim);
                 qDim.AddMeasures(Measures);
 
                 var dimResult = new DimensionResult<TFact>(qDim, Measures);
                 ((IDictionary<IDimension, IDimensionEntryResult>)Result)[qDim.Dimension] = dimResult;
-                dimResult.Initialize(QueryDimensions.Where(i => i != qDim), null);
+                dimResult.Initialize(PrimaryQueryDimensions.Skip(1), SecondaryQueryDimensions, null);
+            }
+            else
+            {
+                // no primary dimensions set
+                // generate all secondary permutations
+                foreach (var qDim in SecondaryQueryDimensions)
+                {
+                    TopLevelQueryDimensions.Add(qDim);
+                    qDim.AddMeasures(Measures);
+
+                    var dimResult = new DimensionResult<TFact>(qDim, Measures);
+                    ((IDictionary<IDimension, IDimensionEntryResult>)Result)[qDim.Dimension] = dimResult;
+                    dimResult.Initialize(null, SecondaryQueryDimensions.Where(i => i != qDim), null);
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using dasz.LinqCube;
@@ -49,23 +50,37 @@ namespace dasz.LinqCube.Example
 
             Console.WriteLine("Building queries");
             var genderAgeQuery = new Query<Person>("gender over birthday")
-                                    .WithDimension(time)
-                                    .WithDimension(gender)
+                                    .WithPrimaryDimension(time)
+                                    .WithPrimaryDimension(gender)
                                     .WithMeasure(countAll);
 
             var salaryQuery = new Query<Person>("salary over gender and date of employment")
-                                    .WithDimension(time_empstart)
-                                    .WithDimension(gender)
-                                    .WithDimension(salary)
+                                    .WithPrimaryDimension(time_empstart)
+                                    .WithPrimaryDimension(salary)
+                                    .WithPrimaryDimension(gender)
                                     .WithMeasure(countAll)
                                     .WithMeasure(countEmployedFullMonth)
                                     .WithMeasure(sumSalary);
 
             var countByOfficeQuery = new Query<Person>("count currently employed by office")
-                                    .WithDimension(time_employment)
-                                    .WithDimension(offices)
+                                    .WithPrimaryDimension(offices)
+                                    .WithPrimaryDimension(time_employment)
                                     .WithMeasure(countAll)
                                     .WithMeasure(countStartingEmployment);
+
+            // this query's dimensions can only be accessed in the order specified in "WithDimensions"
+            // internally this enables the query to optimise measuring significantly
+            var specialisedQuery = new Query<Person>("test-drive for a single-path query)")
+                                    .WithPrimaryDimension(offices)
+                                    .WithPrimaryDimension(time_empstart)
+                                    .WithPrimaryDimension(time_employment)
+                                    .WithPrimaryDimension(gender)
+                                    .WithPrimaryDimension(salary)
+                                    .WithMeasure(countAll)
+                                    .WithMeasure(sumSalary);
+
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
 
             CubeResult result;
             using (var ctx = new Repository())
@@ -76,6 +91,9 @@ namespace dasz.LinqCube.Example
                                 countByOfficeQuery
                 );
             }
+
+            watch.Stop();
+            Console.WriteLine("Cube ran for {0}", watch.Elapsed);
 
             ////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////////////////////////////////////////////////////
