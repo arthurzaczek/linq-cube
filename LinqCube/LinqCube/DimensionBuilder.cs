@@ -103,16 +103,16 @@ namespace dasz.LinqCube
         {
             foreach (var parent in lst)
             {
-                for (int month = parent.Min.Month; month <= parent.Max.Month; month++)
+                for (DateTime month = new DateTime(parent.Min.Year, parent.Min.Month, 1); month <= parent.Max; month = month.AddMonths(1))
                 {
-                    var dtFrom = new DateTime(parent.Min.Year, month, 1);
+                    var dtFrom = month;
                     var dtUntil = dtFrom.AddMonths(1);
                     if (dtFrom < parent.Min) dtFrom = parent.Min;
                     if (dtUntil > parent.Max) dtUntil = parent.Max;
 
                     if (dtUntil != dtFrom)
                     {
-                        parent.Children.Add(new DimensionEntry<DateTime>(month.ToString(), parent)
+                        parent.Children.Add(new DimensionEntry<DateTime>(month.ToString("MM"), parent)
                         {
                             Min = dtFrom,
                             Max = dtUntil
