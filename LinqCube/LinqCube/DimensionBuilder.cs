@@ -77,18 +77,18 @@ namespace dasz.LinqCube
             return lst.SelectMany(i => i.Children).ToList();
         }
 
-        public static List<DimensionEntry<DateTime>> BuildQuater(this List<DimensionEntry<DateTime>> lst)
+        public static List<DimensionEntry<DateTime>> BuildQuarter(this List<DimensionEntry<DateTime>> lst)
         {
             foreach (var parent in lst)
             {
-                for (int quater = 1; quater <= 4; quater++)
+                for (int quarter = 1; quarter <= 4; quarter++)
                 {
-                    var dtFrom = new DateTime(parent.Min.Year, ((quater - 1) * 3) + 1, 1);
+                    var dtFrom = new DateTime(parent.Min.Year, ((quarter - 1) * 3) + 1, 1);
                     var dtUntil = dtFrom.AddMonths(3);
                     if (dtFrom < parent.Min) dtFrom = parent.Min;
                     if (dtUntil > parent.Max) dtUntil = parent.Max;
 
-                    parent.Children.Add(new DimensionEntry<DateTime>(quater.ToString(), parent)
+                    parent.Children.Add(new DimensionEntry<DateTime>(quarter.ToString(), parent)
                     {
                         Min = dtFrom,
                         Max = dtUntil
