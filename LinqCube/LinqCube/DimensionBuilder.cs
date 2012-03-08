@@ -274,5 +274,24 @@ namespace dasz.LinqCube
             }
             return lst.SelectMany(i => i.Children).ToList();
         }
+
+        public static List<DimensionEntry<bool>> BuildBool(this DimensionEntry<bool> parent)
+        {
+            parent.Children.Add(new DimensionEntry<bool>(false.ToString(), parent)
+            {
+                Value = false,
+                Min = false,
+                Max = false
+            });
+
+            parent.Children.Add(new DimensionEntry<bool>(true.ToString(), parent)
+            {
+                Value = true,
+                Min = true,
+                Max = true
+            });
+
+            return parent.Children;
+        }
     }
 }

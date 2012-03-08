@@ -14,6 +14,7 @@ namespace dasz.LinqCube.Example
         public DateTime? EmploymentEnd { get; set; }
         public decimal Salary { get; set; }
         public string Office { get; set; }
+        public bool Active { get; set; }
     }
 
     public class Repository : IDisposable
@@ -73,6 +74,7 @@ namespace dasz.LinqCube.Example
                     EmploymentStart = empStart,
                     EmploymentEnd = empEnd,
                     Office = OFFICES[rnd.Next(OFFICES.Length)],
+                    Active = rnd.NextDouble() > 0.3,
                 });
             }
 

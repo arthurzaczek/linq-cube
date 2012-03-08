@@ -35,9 +35,13 @@ namespace dasz.LinqCube.Example
                     .BuildPartition(100)
                     .Build<decimal, Person>();
 
-            Dimension<string, Person> offices = new Dimension<string, Person>("Office", k => k.Office)
+            var offices = new Dimension<string, Person>("Office", k => k.Office)
                 .BuildEnum(Repository.OFFICES)
                 .Build<string, Person>();
+
+            var is_active = new Dimension<bool, Person>("Active", k => k.Active)
+                .BuildBool()
+                .Build<bool, Person>();
 
             Console.WriteLine("Building measures");
             var countAll = new CountMeasure<Person>("Count", k => true);
@@ -65,6 +69,7 @@ namespace dasz.LinqCube.Example
             var countByOfficeQuery = new Query<Person>("count currently employed by office")
                                     .WithPrimaryDimension(offices)
                                     .WithPrimaryDimension(time_employment)
+                                    .WithPrimaryDimension(is_active)
                                     .WithMeasure(countAll)
                                     .WithMeasure(countStartingEmployment);
 
@@ -139,8 +144,11 @@ namespace dasz.LinqCube.Example
                     officeEntry.Label,
                     string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", officeCounts[c][countAll].IntValue)).ToArray())
                 );
-                Console.WriteLine("          |{0}",
+                Console.WriteLine("starting  |{0}",
                     string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", officeCounts[c][countStartingEmployment].IntValue)).ToArray())
+                );
+                Console.WriteLine("active    |{0}",
+                    string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", officeCounts[c][is_active][true.ToString()][countAll].IntValue)).ToArray())
                 );
             }
 
