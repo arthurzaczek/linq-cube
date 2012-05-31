@@ -17,23 +17,23 @@ namespace dasz.LinqCube
         public QueryResult Result { get; private set; }
 
         /// <summary>
-        /// The list of primary dimensions. These dimensions can only be accessed in the order of their definition.
+        /// The list of chained dimensions. These dimensions can only be accessed in the order of their definition.
         /// </summary>
         /// <remarks>
         /// The runtime of a query is in the order of the product of all entry-counts.
         /// </remarks>
-        internal List<IQueryDimension> PrimaryQueryDimensions { get; private set; }
+        internal List<IQueryDimension> ChainedQueryDimensions { get; private set; }
 
         /// <summary>
-        /// The list of secondary dimensions. These dimensions can only be accessed in any order after all primary dimensions were walked.
+        /// The list of crossing dimensions. These dimensions can only be accessed in any order after all chained dimensions were walked.
         /// </summary>
         /// <remarks>
-        /// The runtime of a query is O(n^d), where d is the number of secondary query dimensions.
+        /// The runtime of a query is O(n^d), where d is the number of crossing query dimensions.
         /// </remarks>
-        internal List<IQueryDimension> SecondaryQueryDimensions { get; private set; }
+        internal List<IQueryDimension> CrossingQueryDimensions { get; private set; }
 
         /// <summary>
-        /// The list of top-level query dimensions. This is initialised together with the QueryResult and is used to decouple the executor from the primary/secondary distinction.
+        /// The list of top-level query dimensions. This is initialised together with the QueryResult and is used to decouple the executor from the chained/crossing distinction.
         /// </summary>
         private List<IQueryDimension> TopLevelQueryDimensions;
 
@@ -42,8 +42,8 @@ namespace dasz.LinqCube
         public Query(string name)
         {
             Name = name;
-            PrimaryQueryDimensions = new List<IQueryDimension>();
-            SecondaryQueryDimensions = new List<IQueryDimension>();
+            ChainedQueryDimensions = new List<IQueryDimension>();
+            CrossingQueryDimensions = new List<IQueryDimension>();
             TopLevelQueryDimensions = new List<IQueryDimension>();
             Measures = new List<IMeasure>();
         }
@@ -64,30 +64,30 @@ namespace dasz.LinqCube
         {
             Result = new QueryResult();
 
-            if (PrimaryQueryDimensions.Count > 0)
+            if (ChainedQueryDimensions.Count > 0)
             {
-                // we have a primary dimension.
+                // we have a chained dimension.
                 // Create result and recurse initialisation
-                var qDim = PrimaryQueryDimensions.First();
+                var qDim = ChainedQueryDimensions.First();
                 TopLevelQueryDimensions.Add(qDim);
                 qDim.AddMeasures(Measures);
 
                 var dimResult = new DimensionResult<TFact>(qDim, Measures);
                 ((IDictionary<IDimension, IDimensionEntryResult>)Result)[qDim.Dimension] = dimResult;
-                dimResult.Initialize(PrimaryQueryDimensions.Skip(1), SecondaryQueryDimensions, null);
+                dimResult.Initialize(ChainedQueryDimensions.Skip(1), CrossingQueryDimensions, null);
             }
             else
             {
-                // no primary dimensions set
-                // generate all secondary permutations
-                foreach (var qDim in SecondaryQueryDimensions)
+                // no chained dimensions set
+                // generate all crossing permutations
+                foreach (var qDim in CrossingQueryDimensions)
                 {
                     TopLevelQueryDimensions.Add(qDim);
                     qDim.AddMeasures(Measures);
 
                     var dimResult = new DimensionResult<TFact>(qDim, Measures);
                     ((IDictionary<IDimension, IDimensionEntryResult>)Result)[qDim.Dimension] = dimResult;
-                    dimResult.Initialize(null, SecondaryQueryDimensions.Where(i => i != qDim), null);
+                    dimResult.Initialize(null, CrossingQueryDimensions.Where(i => i != qDim), null);
                 }
             }
         }

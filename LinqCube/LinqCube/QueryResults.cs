@@ -73,34 +73,34 @@ namespace dasz.LinqCube
             }
         }
 
-        public void Initialize(IEnumerable<IQueryDimension> primaryDimensions, IEnumerable<IQueryDimension> secondaryDimensions, IDimensionEntryResult parentCoordinate)
+        public void Initialize(IEnumerable<IQueryDimension> chainedDimensions, IEnumerable<IQueryDimension> crossingDimensions, IDimensionEntryResult parentCoordinate)
         {
             ParentCoordinate = parentCoordinate;
             foreach (var child in DimensionEntry.Children)
             {
                 var result = new DimensionEntryResult<TFact>(child, Measures);
                 Entries[child] = result;
-                result.Initialize(primaryDimensions, secondaryDimensions, parentCoordinate);
+                result.Initialize(chainedDimensions, crossingDimensions, parentCoordinate);
             }
 
-            var nextDim = primaryDimensions == null ? null : primaryDimensions.FirstOrDefault();
+            var nextDim = chainedDimensions == null ? null : chainedDimensions.FirstOrDefault();
             if (nextDim != null)
             {
-                // we have a "next" primary dimension.
+                // we have a "next" chained dimension.
                 // Create result and recurse initialisation
                 var nextResult = new DimensionResult<TFact>(nextDim, Measures);
                 OtherDimensions[nextDim] = nextResult;
-                nextResult.Initialize(primaryDimensions.Skip(1), secondaryDimensions, this);
+                nextResult.Initialize(chainedDimensions.Skip(1), crossingDimensions, this);
             }
             else
             {
-                // no primary dimensions left
-                // generate all secondary permutations
-                foreach (var other in secondaryDimensions)
+                // no chained dimensions left
+                // generate all crossing permutations
+                foreach (var other in crossingDimensions)
                 {
                     var otherResult = new DimensionResult<TFact>(other, Measures);
                     OtherDimensions[other] = otherResult;
-                    otherResult.Initialize(null, secondaryDimensions.Where(i => i != other), this);
+                    otherResult.Initialize(null, crossingDimensions.Where(i => i != other), this);
                 }
             }
 

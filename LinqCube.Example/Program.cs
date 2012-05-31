@@ -54,33 +54,33 @@ namespace dasz.LinqCube.Example
 
             Console.WriteLine("Building queries");
             var genderAgeQuery = new Query<Person>("gender over birthday")
-                                    .WithPrimaryDimension(time)
-                                    .WithPrimaryDimension(gender)
+                                    .WithChainedDimension(time)
+                                    .WithChainedDimension(gender)
                                     .WithMeasure(countAll);
 
             var salaryQuery = new Query<Person>("salary over gender and date of employment")
-                                    .WithPrimaryDimension(time_empstart)
-                                    .WithPrimaryDimension(salary)
-                                    .WithPrimaryDimension(gender)
+                                    .WithChainedDimension(time_empstart)
+                                    .WithChainedDimension(salary)
+                                    .WithChainedDimension(gender)
                                     .WithMeasure(countAll)
                                     .WithMeasure(countEmployedFullMonth)
                                     .WithMeasure(sumSalary);
 
             var countByOfficeQuery = new Query<Person>("count currently employed by office")
-                                    .WithPrimaryDimension(offices)
-                                    .WithPrimaryDimension(time_employment)
-                                    .WithPrimaryDimension(is_active)
+                                    .WithChainedDimension(offices)
+                                    .WithChainedDimension(time_employment)
+                                    .WithChainedDimension(is_active)
                                     .WithMeasure(countAll)
                                     .WithMeasure(countStartingEmployment);
 
             // this query's dimensions can only be accessed in the order specified in "WithDimensions"
             // internally this enables the query to optimise measuring significantly
             var specialisedQuery = new Query<Person>("test-drive for a single-path query)")
-                                    .WithPrimaryDimension(offices)
-                                    .WithPrimaryDimension(time_empstart)
-                                    .WithPrimaryDimension(time_employment)
-                                    .WithPrimaryDimension(gender)
-                                    .WithPrimaryDimension(salary)
+                                    .WithChainedDimension(offices)
+                                    .WithChainedDimension(time_empstart)
+                                    .WithChainedDimension(time_employment)
+                                    .WithChainedDimension(gender)
+                                    .WithChainedDimension(salary)
                                     .WithMeasure(countAll)
                                     .WithMeasure(sumSalary);
 
