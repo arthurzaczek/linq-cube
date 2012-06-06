@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>LinqCube</id>
+    <version>1.0.$REVNUM$.$DIRTY$</version>
+    <title>LinqCube</title>
+    <authors>dasz.at OG</authors>
+    <owners>dasz.at OG</owners>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+    <projectUrl>http://code.google.com/p/linq-cube/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>LinqCube is a small utility library to define measures and dimensions in code an do in-memory cubes against LINQ queries.</description>
+    <releaseNotes>First package.</releaseNotes>
+    <copyright>Copyright © 2011,2012 dasz.at OG</copyright>
+    <tags>Linq Cube OLAP Library</tags>
+  </metadata>
+  <files>
+    <file src="LinqCube.dll" target="lib/net35" />
+    <file src="LinqCube.xml" target="lib/net35" />
+  </files>
+</package>

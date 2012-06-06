@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\LinqCube.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -33,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\LinqCube.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -77,10 +79,14 @@
     <Compile Include="Properties\VersionInfo.Designer.cs">
       <DependentUpon>VersionInfo.cs</DependentUpon>
     </Compile>
+    <None Include="LinqCube.nuspec">
+      <DependentUpon>LinqCube.nuspec.in</DependentUpon>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\VersionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="LinqCube.nuspec">
+    <None Include="LinqCube.nuspec.in">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
@@ -97,6 +103,7 @@
   <Import Project="..\packages\MSBuildVersioning.1.0.34.0\lib\net35\MsBuildVersioning.targets" />
   <Target Name="BeforeBuild">
     <GitVersionFile TemplateFile="Properties\VersionInfo.cs" DestinationFile="Properties\VersionInfo.Designer.cs" />
+    <GitVersionFile TemplateFile="LinqCube.nuspec.in" DestinationFile="LinqCube.nuspec" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -105,4 +112,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="Package">
+    <Exec WorkingDirectory="$(OutputPath)" Command="$(NuGetCommand) pack LinqCube.nuspec -prop Configuration=$(Configuration)" />
+  </Target>
 </Project>

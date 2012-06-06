@@ -3,6 +3,7 @@
 /*/obj
 /*/bin
 /LinqCube/LinqCube.csproj.user
+/LinqCube/LinqCube.nuspec
 /LinqCube/LinqCube.*.nupkg
 /LinqCube/Properties/VersionInfo.Designer.cs
 /packages/MSBuildVersioning.1.0.34.0/MSBuildVersioning.1.0.34.0.nupkg
