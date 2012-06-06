@@ -5,6 +5,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube", "LinqCube\LinqCu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube.Example", "LinqCube.Example\LinqCube.Example.csproj", "{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{E3EB6474-A02B-418D-9BFF-AFF306FD1368}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\nuget.exe = .nuget\nuget.exe
+		.nuget\nuget.targets = .nuget\nuget.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

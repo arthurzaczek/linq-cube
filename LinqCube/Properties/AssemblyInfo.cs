@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("LinqCube")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("LinqCube is a small utility library to define measures and dimensions in code an do in-memory cubes against LINQ queries.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("dasz.at OG")]
 [assembly: AssemblyProduct("LinqCube")]
-[assembly: AssemblyCopyright("Copyright ©  2011")]
+[assembly: AssemblyCopyright("Copyright © 2011,2012 dasz.at OG")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

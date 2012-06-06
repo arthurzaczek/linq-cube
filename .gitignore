@@ -2,3 +2,5 @@
 *.suo
 /*/obj
 /*/bin
+/LinqCube/LinqCube.csproj.user
+/LinqCube/LinqCube.*.nupkg
