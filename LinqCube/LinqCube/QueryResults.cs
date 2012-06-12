@@ -190,5 +190,22 @@ namespace dasz.LinqCube
             }
             return false;
         }
+
+        /// <summary>
+        /// Retrieves the inner-most parent date coordinate of this entry.
+        /// </summary>
+        /// <param name="self"></param>
+        /// <returns>the inner-most parent date coordinate of this entry or null</returns>
+        public static DimensionEntry<DateTime> GetDateTimeEntry(this IDimensionEntryResult self)
+        {
+            while (self != null)
+            {
+                var entry = self.DimensionEntry as DimensionEntry<DateTime>;
+                if (entry != null)
+                    return entry;
+                self = self.ParentCoordinate;
+            }
+            return null;
+        }
     }
 }
