@@ -79,6 +79,30 @@ namespace dasz.LinqCube
         }
     }
 
+    public class IntSumMeasure<TFact> : Measure<TFact, int>
+    {
+        public IntSumMeasure(string name, Func<TFact, int> selector)
+            : this(name, (fact, entry) => selector(fact))
+        {
+        }
+
+        public IntSumMeasure(string name, Func<TFact, IDimensionEntryResult, int> selector)
+            : base(name, selector)
+        {
+        }
+
+        public override IMeasureResult CreateResult()
+        {
+            return new DecimalMeasureResult(this, 0);
+        }
+
+        public override void Apply(IMeasureResult result, IDimensionEntryResult entry, object item)
+        {
+            var myResult = (DecimalMeasureResult)result;
+            myResult.Set(myResult.DecimalValue + Selector((TFact)item, entry));
+        }
+    }
+
     public class CountMeasure<TFact> : Measure<TFact, bool>
     {
         public CountMeasure(string name, Func<TFact, bool> selector)
