@@ -207,5 +207,24 @@ namespace dasz.LinqCube
             }
             return null;
         }
+
+        /// <summary>
+        /// Flattens a Dimensions hierarchie
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dim"></param>
+        /// <returns></returns>
+        public static IEnumerable<DimensionEntry<TDimension>> FlattenHierarchy<TDimension>(this DimensionEntry<TDimension> dim)
+            where TDimension : IComparable
+        {
+            var result = new List<DimensionEntry<TDimension>>();
+
+            foreach (DimensionEntry<TDimension> c in dim)
+            {
+                result.Add(c);
+                result.AddRange(FlattenHierarchy(c));
+            }
+            return result;
+        }
     }
 }
