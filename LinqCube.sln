@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube", "LinqCube\LinqCube.csproj", "{EC97DECA-69FA-4903-8C5D-798ADBD84D98}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube.Example", "LinqCube.Example\LinqCube.Example.csproj", "{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}"
