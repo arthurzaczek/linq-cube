@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <package>
   <metadata>
     <id>LinqCube</id>
@@ -10,8 +10,8 @@
     <projectUrl>http://code.google.com/p/linq-cube/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>LinqCube is a small utility library to define measures and dimensions in code an do in-memory cubes against LINQ queries.</description>
-    <releaseNotes>Add IntSumMeasure and DimensionEntry&lt;DateTime&gt; GetDateTimeEntry(this IDimensionEntryResult self).</releaseNotes>
-    <copyright>Copyright © 2011,2012 dasz.at OG</copyright>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright © 2015 dasz.at e.U.</copyright>
     <tags>Linq Cube OLAP Library</tags>
   </metadata>
   <files>
