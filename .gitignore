@@ -1,12 +1,10 @@
 
 *.suo
+*.user
+# will be created from template
+*.nuspec
+# output
+*.nupkg
 /*/obj
 /*/bin
-/LinqCube/LinqCube.csproj.user
-/LinqCube/LinqCube.nuspec
-/LinqCube/LinqCube.*.nupkg
-/LinqCube/Properties/VersionInfo.Designer.cs
-/packages/MSBuildVersioning.1.0.34.0/MSBuildVersioning.1.0.34.0.nupkg
-/packages/MSBuildVersioning.1.0.34.0/content/Properties/VersionInfo.cs
-/packages/MSBuildVersioning.1.0.34.0/tools/Install.ps1
-/packages/NuGetPowerTools.*
+/packages/

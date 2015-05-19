@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>LinqCube</id>
-    <version>1.0.$REVNUM$.$DIRTY$</version>
+    <version>##VERSION##</version>
     <title>LinqCube</title>
     <authors>dasz.at OG</authors>
     <owners>dasz.at OG</owners>
@@ -15,7 +15,7 @@
     <tags>Linq Cube OLAP Library</tags>
   </metadata>
   <files>
-    <file src="LinqCube.dll" target="lib/net35" />
-    <file src="LinqCube.xml" target="lib/net35" />
+    <file src="..\LinqCube\bin\Release\LinqCube.dll" target="lib/net35" />
+    <file src="..\LinqCube\bin\Release\LinqCube.xml" target="lib/net35" />
   </files>
 </package>

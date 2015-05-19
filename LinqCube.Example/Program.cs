@@ -11,6 +11,8 @@ namespace dasz.LinqCube.Example
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Testing Linq-Cube v{0}", typeof(Program).Assembly.GetName().Version);
+
             Console.WriteLine("Building dimensions");
             var time = new Dimension<DateTime, Person>("Time", k => k.Birthday)
                     .BuildYear(1978, Repository.CURRENT_YEAR)

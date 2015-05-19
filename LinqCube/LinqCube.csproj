@@ -14,6 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>3e677ec6</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -57,19 +58,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Properties\VersionInfo.Designer.cs">
-      <DependentUpon>VersionInfo.cs</DependentUpon>
-    </Compile>
-    <None Include="LinqCube.nuspec">
-      <DependentUpon>LinqCube.nuspec.in</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Properties\VersionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="LinqCube.nuspec.in">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -81,11 +71,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
-  <Import Project="..\packages\MSBuildVersioning.1.0.34.0\lib\net35\MsBuildVersioning.targets" />
-  <Target Name="BeforeBuild">
-    <GitVersionFile TemplateFile="Properties\VersionInfo.cs" DestinationFile="Properties\VersionInfo.Designer.cs" />
-    <GitVersionFile TemplateFile="LinqCube.nuspec.in" DestinationFile="LinqCube.nuspec" />
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -95,5 +80,12 @@
   -->
   <Target Name="Package">
     <Exec WorkingDirectory="$(OutputPath)" Command="$(NuGetCommand) pack LinqCube.nuspec -prop Configuration=$(Configuration)" />
+  </Target>
+  <Import Project="..\packages\GitVersionTask.3.0.0-beta0002\Build\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.3.0.0-beta0002\Build\GitVersionTask.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\GitVersionTask.3.0.0-beta0002\Build\GitVersionTask.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GitVersionTask.3.0.0-beta0002\Build\GitVersionTask.targets'))" />
   </Target>
 </Project>
