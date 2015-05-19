@@ -7,7 +7,7 @@ msbuild ..\LinqCube.sln /p:Configuration=Release
 $str = (..\packages\GitVersion.CommandLine.3.0.0-beta0002\Tools\GitVersion.exe) | out-string
 $json = ConvertFrom-Json $str
 
-$version = $json.MajorMinorPatch
+$version = $json.NuGetVersionV2
 "  Version = $version" | out-host
 
 Get-Content LinqCube.nuspec.template | Foreach-object { 
