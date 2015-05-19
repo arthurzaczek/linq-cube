@@ -2,7 +2,9 @@
 
 rm *.nupkg
 
-msbuild ..\LinqCube.sln /p:Configuration=Release
+# don't forget to 
+# msbuild ..\LinqCube.sln /p:Configuration=Release
+# if creating the package locally
 
 $str = (..\packages\GitVersion.CommandLine.3.0.0-beta0002\Tools\GitVersion.exe) | out-string
 $json = ConvertFrom-Json $str
