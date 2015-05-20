@@ -5,22 +5,52 @@ using System.Text;
 
 namespace dasz.LinqCube
 {
+    /// <summary>
+    /// An entry of a dimension
+    /// </summary>
     public interface IDimensionEntry : IEnumerable<IDimensionEntry>
     {
+        /// <summary>
+        /// Returns the entry label.
+        /// </summary>
         string Label { get; }
+        /// <summary>
+        /// Returns all children
+        /// </summary>
         IEnumerable<IDimensionEntry> Children { get; }
+        /// <summary>
+        /// Returns the parent dimension entry
+        /// </summary>
         IDimensionEntry Parent { get; }
+        /// <summary>
+        /// Return the root dimension
+        /// </summary>
         IDimension Root { get; }
     }
 
+    /// <summary>
+    /// A dimension. A dimension may be the entry of another dimension.
+    /// </summary>
     public interface IDimension : IDimensionEntry
     {
+        /// <summary>
+        /// Returns the name of the dimension
+        /// </summary>
         string Name { get; }
     }
 
+    /// <summary>
+    /// Implements a dimension entry
+    /// </summary>
+    /// <typeparam name="TDimension"></typeparam>
     public class DimensionEntry<TDimension> : IDimensionEntry
         where TDimension : IComparable
     {
+        /// <summary>
+        /// Creats a new dimension entry
+        /// </summary>
+        /// <param name="label"></param>
+        /// <param name="parent"></param>
         public DimensionEntry(string label, DimensionEntry<TDimension> parent)
         {
             this._parent = parent;
@@ -28,6 +58,9 @@ namespace dasz.LinqCube
             Children = new List<DimensionEntry<TDimension>>();
         }
 
+        /// <summary>
+        /// Returns the entry label.
+        /// </summary>
         public string Label { get; set; }
 
         /// <summary>
@@ -41,6 +74,10 @@ namespace dasz.LinqCube
         public virtual TDimension Max { get; set; }
 
         private TDimension _value;
+
+        /// <summary>
+        /// Signals, that the entry has a value
+        /// </summary>
         protected bool hasValue { get; private set; }
 
         /// <summary>
@@ -60,6 +97,11 @@ namespace dasz.LinqCube
             }
         }
 
+        /// <summary>
+        /// checks if the given value is in range of this entry
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public virtual bool InRange(TDimension value)
         {
             if (hasValue)
@@ -77,6 +119,12 @@ namespace dasz.LinqCube
             }
         }
 
+        /// <summary>
+        /// checks if this entry is in the given range
+        /// </summary>
+        /// <param name="lower"></param>
+        /// <param name="upper"></param>
+        /// <returns></returns>
         public bool InRange(TDimension lower, TDimension upper)
         {
             if (hasValue)
@@ -91,15 +139,33 @@ namespace dasz.LinqCube
         }
 
         private DimensionEntry<TDimension> _parent;
+        /// <summary>
+        /// Returns the parent dimension entry
+        /// </summary>
         public IDimensionEntry Parent { get { return _parent; } }
+        /// <summary>
+        /// Return the root dimension
+        /// </summary>
         public virtual IDimension Root { get { return Parent.Root; } }
+        /// <summary>
+        /// Returns all children
+        /// </summary>
         public List<DimensionEntry<TDimension>> Children { get; private set; }
         IEnumerable<IDimensionEntry> IDimensionEntry.Children { get { return Children.Cast<IDimensionEntry>(); } }
 
+        /// <summary>
+        /// Returns a debug output
+        /// </summary>
+        /// <returns></returns>
         public string DebugOut()
         {
             return DebugOut(0);
         }
+        /// <summary>
+        /// Returns a debug output with a left padding
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
         public string DebugOut(int level)
         {
             var sb = new StringBuilder();
@@ -111,6 +177,10 @@ namespace dasz.LinqCube
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Returns label
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return Label;
@@ -121,6 +191,10 @@ namespace dasz.LinqCube
             get { return Parent as IDimensionEntry; }
         }
 
+        /// <summary>
+        /// Returns all children
+        /// </summary>
+        /// <returns></returns>
         public IEnumerator<IDimensionEntry> GetEnumerator()
         {
             return Children.Cast<IDimensionEntry>().GetEnumerator();
@@ -133,26 +207,50 @@ namespace dasz.LinqCube
     }
 
     /// <summary>
-    /// Dimension descriptor, 
+    /// Dimension descriptor
     /// </summary>
     public class Dimension<TDimension, TFact> : DimensionEntry<TDimension>, IDimension
         where TDimension : IComparable
     {
+        /// <summary>
+        /// Creates a new dimension
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="selector"></param>
         public Dimension(string name, Func<TFact, TDimension> selector)
             : this(name, selector, null, null)
         {
         }
 
+        /// <summary>
+        /// Creates a new dimension
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="startSelector"></param>
+        /// <param name="endSelector"></param>
         public Dimension(string name, Func<TFact, TDimension> startSelector, Func<TFact, TDimension> endSelector)
             : this(name, startSelector, endSelector, null)
         {
         }
 
+        /// <summary>
+        /// Creates a new dimension
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="selector"></param>
+        /// <param name="filter"></param>
         public Dimension(string name, Func<TFact, TDimension> selector, Func<TFact, bool> filter)
             : this(name, selector, null, filter)
         {
         }
 
+        /// <summary>
+        /// Creates a new dimension
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="startSelector"></param>
+        /// <param name="endSelector"></param>
+        /// <param name="filter"></param>
         public Dimension(string name, Func<TFact, TDimension> startSelector, Func<TFact, TDimension> endSelector, Func<TFact, bool> filter)
             : base(name, null)
         {
@@ -162,18 +260,41 @@ namespace dasz.LinqCube
             this.Filter = filter;
         }
 
+        /// <summary>
+        /// Name of the dimension
+        /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        /// Selects a fact from the query
+        /// </summary>
         public Func<TFact, TDimension> Selector { get; private set; }
+        /// <summary>
+        /// Selects a fact from the query for range dimensions
+        /// </summary>
         public Func<TFact, TDimension> EndSelector { get; private set; }
+        /// <summary>
+        /// Applies a filter
+        /// </summary>
         public Func<TFact, bool> Filter { get; private set; }
 
+        /// <summary>
+        /// Returns a string representation
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return "Dim: " + Name;
         }
 
+        /// <summary>
+        /// Returns the root dimension of the current dimension
+        /// </summary>
         public override IDimension Root { get { return this; } }
 
+        /// <summary>
+        /// Returns the lower boundary
+        /// </summary>
         public override TDimension Min
         {
             get
@@ -186,6 +307,9 @@ namespace dasz.LinqCube
             }
         }
 
+        /// <summary>
+        /// Returns the upper boundary
+        /// </summary>
         public override TDimension Max
         {
             get
@@ -198,6 +322,11 @@ namespace dasz.LinqCube
             }
         }
 
+        /// <summary>
+        /// Checks if a value is in range.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override bool InRange(TDimension value)
         {
             if (hasValue)

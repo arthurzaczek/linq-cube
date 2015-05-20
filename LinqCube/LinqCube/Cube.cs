@@ -5,8 +5,18 @@ using System.Text;
 
 namespace dasz.LinqCube
 {
-    public class Cube
+    /// <summary>
+    /// Static class for executing a cube
+    /// </summary>
+    public static class Cube
     {
+        /// <summary>
+        /// Executes a cube and build all results
+        /// </summary>
+        /// <typeparam name="TFact">Type of the underlying fact.</typeparam>
+        /// <param name="source">Source</param>
+        /// <param name="queries">list of cube queries</param>
+        /// <returns>a cube result</returns>
         public static CubeResult Execute<TFact>(IQueryable<TFact> source, params Query<TFact>[] queries)
         {
             var result = new CubeResult();
@@ -33,8 +43,14 @@ namespace dasz.LinqCube
         }
     }
 
+    /// <summary>
+    /// Represents the result of a cube
+    /// </summary>
     public class CubeResult : Dictionary<IQuery, QueryResult>
     {
+        /// <summary>
+        /// Constructs a new cube result
+        /// </summary>
         public CubeResult()
         {
         }

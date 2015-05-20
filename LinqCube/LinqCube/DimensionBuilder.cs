@@ -5,14 +5,31 @@ using System.Text;
 
 namespace dasz.LinqCube
 {
+    /// <summary>
+    /// Static helper class for building dimensions
+    /// </summary>
     public static class DimensionBuilder
     {
+        /// <summary>
+        /// Finally builds a dimension
+        /// </summary>
+        /// <typeparam name="TDimension"></typeparam>
+        /// <typeparam name="TFact"></typeparam>
+        /// <param name="lst"></param>
+        /// <returns></returns>
         public static Dimension<TDimension, TFact> Build<TDimension, TFact>(this List<DimensionEntry<TDimension>> lst)
             where TDimension : IComparable
         {
             return (Dimension<TDimension, TFact>)lst.First().Root;
         }
 
+        /// <summary>
+        /// Builds a dimension representing Years
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="fromYear"></param>
+        /// <param name="thruYear"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<DateTime>> BuildYear(this DimensionEntry<DateTime> parent, int fromYear, int thruYear)
         {
             for (int year = fromYear; year <= thruYear; year++)
@@ -30,6 +47,13 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
+        /// <summary>
+        /// Builds a dimension representing all Years in the the given range
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="from"></param>
+        /// <param name="thruDay"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<DateTime>> BuildYearRange(this DimensionEntry<DateTime> parent, DateTime from, DateTime thruDay)
         {
             if (from != from.Date) throw new ArgumentOutOfRangeException("from", "contains time component");
@@ -43,6 +67,18 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
+        /// <summary>
+        /// Builds a dimension representing Years in the given range. This method limits the years individual ends, e.g. 1.1. - 1.3. 
+        /// This makes part of years comparable.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="fromYear"></param>
+        /// <param name="thruYear"></param>
+        /// <param name="sliceFromMonth"></param>
+        /// <param name="sliceFromDay"></param>
+        /// <param name="sliceThruMonth"></param>
+        /// <param name="sliceThruDay"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<DateTime>> BuildYearSlice(this DimensionEntry<DateTime> parent, int fromYear, int thruYear, int sliceFromMonth, int? sliceFromDay, int sliceThruMonth, int? sliceThruDay)
         {
             for (int year = fromYear; year <= thruYear; year++)
@@ -68,6 +104,11 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
+        /// <summary>
+        /// Build years from the given time dimensions
+        /// </summary>
+        /// <param name="lst"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<DateTime>> BuildYear(this List<DimensionEntry<DateTime>> lst)
         {
             foreach (var parent in lst)
@@ -77,6 +118,11 @@ namespace dasz.LinqCube
             return lst.SelectMany(i => i.Children).ToList();
         }
 
+        /// <summary>
+        /// Build quaters from the given time dimensions
+        /// </summary>
+        /// <param name="lst"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<DateTime>> BuildQuarter(this List<DimensionEntry<DateTime>> lst)
         {
             foreach (var parent in lst)
@@ -99,6 +145,11 @@ namespace dasz.LinqCube
             return lst.SelectMany(i => i.Children).ToList();
         }
 
+        /// <summary>
+        /// Build months from the given time dimensions
+        /// </summary>
+        /// <param name="lst"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<DateTime>> BuildMonths(this List<DimensionEntry<DateTime>> lst)
         {
             foreach (var parent in lst)
@@ -124,6 +175,12 @@ namespace dasz.LinqCube
             return lst.SelectMany(i => i.Children).ToList();
         }
 
+        /// <summary>
+        /// Builds a simple string bases enumeration dimension
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="entries"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<string>> BuildEnum(this DimensionEntry<string> parent, params string[] entries)
         {
             foreach (var e in entries)
@@ -137,6 +194,12 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
+        /// <summary>
+        /// Builds a enumeration dimension from the given Enum Type.
+        /// </summary>
+        /// <typeparam name="TEnum"></typeparam>
+        /// <param name="parent"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<TEnum>> BuildEnum<TEnum>(this DimensionEntry<TEnum> parent)
             where TEnum : struct, IComparable
         {
@@ -155,6 +218,11 @@ namespace dasz.LinqCube
             return parent.Children;
         }
 
+        /// <summary>
+        /// Build a enum dimension from the given string dimensions
+        /// </summary>
+        /// <param name="lst"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<string>> BuildEnum(this List<DimensionEntry<string>> lst)
         {
             foreach (var parent in lst)
@@ -194,27 +262,71 @@ namespace dasz.LinqCube
         }
 
 
+        /// <summary>
+        /// Builds a partition dimension.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="stepSize"></param>
+        /// <param name="lowerLimit"></param>
+        /// <param name="upperLimit"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<decimal>> BuildPartition(this DimensionEntry<decimal> parent, decimal stepSize, decimal lowerLimit, decimal upperLimit)
         {
             return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, decimal.MinValue, decimal.MaxValue, "- {0}", "{0} - {1}", "{0} -");
         }
 
+        /// <summary>
+        /// Builds a partition dimension
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="stepSize"></param>
+        /// <param name="lowerLimit"></param>
+        /// <param name="upperLimit"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<int>> BuildPartition(this DimensionEntry<int> parent, int stepSize, int lowerLimit, int upperLimit)
         {
             return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, int.MinValue, int.MaxValue, "- {0}", "{0} - {1}", "{0} -");
         }
 
+        /// <summary>
+        /// Builds a partition dimension
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="stepSize"></param>
+        /// <param name="lowerLimit"></param>
+        /// <param name="upperLimit"></param>
+        /// <param name="lowerLabelFormat"></param>
+        /// <param name="defaultLabelFormat"></param>
+        /// <param name="upperLabelFormat"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<decimal>> BuildPartition(this DimensionEntry<decimal> parent, decimal stepSize, decimal lowerLimit, decimal upperLimit, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
         {
             return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, decimal.MinValue, decimal.MaxValue, lowerLabelFormat, defaultLabelFormat, upperLabelFormat);
         }
 
+        /// <summary>
+        /// Builds a partition dimension
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="stepSize"></param>
+        /// <param name="lowerLimit"></param>
+        /// <param name="upperLimit"></param>
+        /// <param name="lowerLabelFormat"></param>
+        /// <param name="defaultLabelFormat"></param>
+        /// <param name="upperLabelFormat"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<int>> BuildPartition(this DimensionEntry<int> parent, int stepSize, int lowerLimit, int upperLimit, string lowerLabelFormat, string defaultLabelFormat, string upperLabelFormat)
         {
             return BuildPartition(parent, stepSize, lowerLimit, upperLimit, (a, b) => a + b, int.MinValue, int.MaxValue, lowerLabelFormat, defaultLabelFormat, upperLabelFormat);
         }
 
-        // TODO: refactor the methods below like the BuildPartitions above
+        /// <summary>
+        /// Builds a partition dimension.
+        /// TODO: refactor the methods below like the BuildPartitions above
+        /// </summary>
+        /// <param name="lst"></param>
+        /// <param name="stepSize"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<decimal>> BuildPartition(this List<DimensionEntry<decimal>> lst, decimal stepSize)
         {
             foreach (var parent in lst)
@@ -245,6 +357,12 @@ namespace dasz.LinqCube
             return lst.SelectMany(i => i.Children).ToList();
         }
 
+        /// <summary>
+        /// Builds a partition dimension.
+        /// </summary>
+        /// <param name="lst"></param>
+        /// <param name="stepSize"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<int>> BuildPartition(this List<DimensionEntry<int>> lst, int stepSize)
         {
             foreach (var parent in lst)
@@ -275,6 +393,11 @@ namespace dasz.LinqCube
             return lst.SelectMany(i => i.Children).ToList();
         }
 
+        /// <summary>
+        /// Builds a bool dimension.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <returns></returns>
         public static List<DimensionEntry<bool>> BuildBool(this DimensionEntry<bool> parent)
         {
             parent.Children.Add(new DimensionEntry<bool>(false.ToString(), parent)
