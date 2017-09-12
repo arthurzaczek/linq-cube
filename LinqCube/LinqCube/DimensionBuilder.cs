@@ -204,7 +204,8 @@ namespace dasz.LinqCube
             where TEnum : struct, IComparable
         {
             var enumType = typeof(TEnum);
-            if (!enumType.IsEnum) throw new ArgumentOutOfRangeException("TEnum", "is no enumeration");
+            // TODO: Re-Support this
+            // if (!enumType.IsEnum) throw new ArgumentOutOfRangeException("TEnum", "is no enumeration");
 
             foreach (var e in Enum.GetValues(enumType))
             {
