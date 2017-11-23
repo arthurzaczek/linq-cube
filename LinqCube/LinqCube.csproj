@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.4</TargetFramework>
+    <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
     <Authors>Arthur Zaczek</Authors>
     <Company>dasz.at e.U.</Company>
     <Description>LinqCube is a small utility library to define measures and dimensions in code an do in-memory cubes against LINQ queries.</Description>
@@ -9,10 +9,11 @@
     <PackageProjectUrl>https://github.com/arthurzaczek/linq-cube</PackageProjectUrl>
     <RepositoryUrl>https://github.com/arthurzaczek/linq-cube</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
-    <FileVersion>1.2.0.0</FileVersion>
+    <AssemblyVersion>1.2.1.0</AssemblyVersion>
+    <FileVersion>1.2.1.0</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
+    <PackageReleaseNotes>Support for .net 4.5</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>
