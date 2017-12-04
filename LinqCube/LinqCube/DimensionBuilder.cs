@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -416,6 +417,83 @@ namespace dasz.LinqCube
             });
 
             return parent.Children;
+        }
+
+        // http://blogs.msdn.com/b/shawnste/archive/2006/01/24/iso-8601-week-of-year-format-in-microsoft-net.aspx
+        // This presumes that weeks start with Monday.
+        // Week 1 is the 1st week of the year with a Thursday in it.
+        public static int GetIso8601WeekOfYear(DateTime time)
+        {
+            // Seriously cheat.  If its Monday, Tuesday or Wednesday, then it'll 
+            // be the same week# as whatever Thursday, Friday or Saturday are,
+            // and we always get those right
+            DayOfWeek day = CultureInfo.InvariantCulture.Calendar.GetDayOfWeek(time);
+            if (day >= DayOfWeek.Monday && day <= DayOfWeek.Wednesday)
+            {
+                time = time.AddDays(3);
+            }
+
+            // Return the week of our adjusted day
+            return CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(time, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+        }
+
+        /// <summary>
+        /// Build weeks from the given time dimensions
+        /// </summary>
+        /// <param name="lst"></param>
+        /// <returns></returns>
+        public static List<DimensionEntry<DateTime>> BuildWeeks(this List<DimensionEntry<DateTime>> lst)
+        {
+            foreach (var parent in lst)
+            {
+                for (DateTime week = parent.Min.Date.AddDays(-(((int)parent.Min.DayOfWeek - 1) % 7)).AddDays(-7); week <= parent.Max; week = week.AddDays(7))
+                {
+                    var dtFrom = week;
+                    var dtUntil = dtFrom.AddDays(7);
+                    if (dtFrom < parent.Min) dtFrom = parent.Min;
+                    if (dtUntil > parent.Max) dtUntil = parent.Max;
+
+                    if (dtUntil != dtFrom)
+                    {
+                        parent.Children.Add(new DimensionEntry<DateTime>(string.Format("{0:00} ({1:g} - {2:g})", GetIso8601WeekOfYear(week), dtFrom, dtUntil.AddDays(-1)), parent)
+                        {
+                            Min = dtFrom,
+                            Max = dtUntil
+                        });
+                    }
+                }
+            }
+
+            return lst.SelectMany(i => i.Children).ToList();
+        }
+
+        /// <summary>
+        /// Build days from the given time dimensions
+        /// </summary>
+        /// <param name="lst"></param>
+        /// <returns></returns>
+        public static List<DimensionEntry<DateTime>> BuildDays(this List<DimensionEntry<DateTime>> lst)
+        {
+            foreach (var parent in lst)
+            {
+                for (DateTime dtFrom = parent.Min.Date; dtFrom <= parent.Max; dtFrom = dtFrom.AddDays(1))
+                {
+                    var dtUntil = dtFrom.AddDays(1);
+                    if (dtFrom < parent.Min) dtFrom = parent.Min;
+                    if (dtUntil > parent.Max) dtUntil = parent.Max;
+
+                    if (dtUntil != dtFrom)
+                    {
+                        parent.Children.Add(new DimensionEntry<DateTime>(dtFrom.ToString("d"), parent)
+                        {
+                            Min = dtFrom,
+                            Max = dtUntil
+                        });
+                    }
+                }
+            }
+
+            return lst.SelectMany(i => i.Children).ToList();
         }
     }
 }
