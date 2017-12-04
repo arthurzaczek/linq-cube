@@ -344,4 +344,104 @@ namespace dasz.LinqCube
             }
         }
     }
+
+    /// <summary>
+    /// Measure to min a TimeSpan value.
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
+    public class TimeSpanMinMeasure<TFact> : Measure<TFact, TimeSpan>
+    {
+        /// <summary>
+        /// Constructs a new Measure
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="selector"></param>
+        public TimeSpanMinMeasure(string name, Func<TFact, TimeSpan> selector)
+            : this(name, (fact, entry) => selector(fact))
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new Measure
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="selector"></param>
+        public TimeSpanMinMeasure(string name, Func<TFact, IDimensionEntryResult, TimeSpan> selector)
+            : base(name, selector)
+        {
+        }
+
+        /// <summary>
+        /// Returns the result of the measure.
+        /// </summary>
+        /// <returns></returns>
+        public override IMeasureResult CreateResult()
+        {
+            return new TimeSpanMeasureResult(this, TimeSpan.MaxValue);
+        }
+
+        /// <summary>
+        /// Applies a entry to a measure.
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="entry"></param>
+        /// <param name="item"></param>
+        public override void Apply(IMeasureResult result, IDimensionEntryResult entry, object item)
+        {
+            var myResult = (TimeSpanMeasureResult)result;
+            var v = Selector((TFact)item, entry);
+            if (v < myResult.TimeSpanValue)
+                myResult.Set(v);
+        }
+    }
+
+    /// <summary>
+    /// Measure to max a TimeSpan value.
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
+    public class TimeSpanMaxMeasure<TFact> : Measure<TFact, TimeSpan>
+    {
+        /// <summary>
+        /// Constructs a new Measure
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="selector"></param>
+        public TimeSpanMaxMeasure(string name, Func<TFact, TimeSpan> selector)
+            : this(name, (fact, entry) => selector(fact))
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new Measure
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="selector"></param>
+        public TimeSpanMaxMeasure(string name, Func<TFact, IDimensionEntryResult, TimeSpan> selector)
+            : base(name, selector)
+        {
+        }
+
+        /// <summary>
+        /// Returns the result of the measure.
+        /// </summary>
+        /// <returns></returns>
+        public override IMeasureResult CreateResult()
+        {
+            return new TimeSpanMeasureResult(this, TimeSpan.MinValue);
+        }
+
+        /// <summary>
+        /// Applies a entry to a measure.
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="entry"></param>
+        /// <param name="item"></param>
+        public override void Apply(IMeasureResult result, IDimensionEntryResult entry, object item)
+        {
+            var myResult = (TimeSpanMeasureResult)result;
+            var v = Selector((TFact)item, entry);
+            if (v > myResult.TimeSpanValue)
+                myResult.Set(v);
+        }
+    }
 }

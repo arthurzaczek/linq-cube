@@ -54,5 +54,14 @@ namespace dasz.LinqCube
         public CubeResult()
         {
         }
+
+        public CubeResult Add(CubeResult other)
+        {
+            foreach (var kv in other)
+            {
+                this.Add(kv.Key, kv.Value);
+            }
+            return this;
+        }
     }
 }
