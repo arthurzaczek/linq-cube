@@ -450,6 +450,8 @@ namespace dasz.LinqCube
                 {
                     var dtFrom = week;
                     var dtUntil = dtFrom.AddDays(7);
+
+                    if (dtUntil < parent.Min) continue; // Started too early
                     if (dtFrom < parent.Min) dtFrom = parent.Min;
                     if (dtUntil > parent.Max) dtUntil = parent.Max;
 

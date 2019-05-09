@@ -19,6 +19,11 @@ namespace dasz.LinqCube.Example
                     .BuildMonths()
                     .Build<DateTime, Person>();
 
+            var time_weeks = new Dimension<DateTime, Person>("Time", k => k.Birthday)
+                .BuildYear(2019, Repository.CURRENT_YEAR)
+                .BuildWeeks()
+                .Build<DateTime, Person>();
+
             var time_empstart = new Dimension<DateTime, Person>("Time employment start", k => k.EmploymentStart.Value, k => k.EmploymentStart.HasValue)
                     .BuildYearSlice(Repository.MIN_DATE.Year, Repository.CURRENT_YEAR, 1, null, 9, null) // only look at jan-sept
                     .BuildMonths()
@@ -56,7 +61,7 @@ namespace dasz.LinqCube.Example
 
             Console.WriteLine("Building queries");
             var genderAgeQuery = new Query<Person>("gender over birthday")
-                                    .WithChainedDimension(time)
+                                    .WithChainedDimension(time_weeks)
                                     .WithChainedDimension(gender)
                                     .WithMeasure(countAll);
 
@@ -152,6 +157,28 @@ namespace dasz.LinqCube.Example
                 Console.WriteLine("active    |{0}",
                     string.Join("|", time_employment.Children.Select(c => string.Format(" {0,6} ", officeCounts[c][is_active][true.ToString()][countAll].IntValue)).ToArray())
                 );
+            }
+
+            ////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////
+
+            Console.WriteLine(genderAgeQuery.Name);
+            Console.WriteLine("==================");
+            Console.WriteLine();
+            foreach (var year in time_weeks)
+            {
+                Console.WriteLine(year.Label);
+                Console.WriteLine("==================");
+                foreach (var week in year)
+                {
+                    Console.WriteLine("{0}: {1}, M: {2} W: {3}",
+                        week.Label,
+                        result[genderAgeQuery][year][week][countAll].IntValue,
+                        result[genderAgeQuery][year][week][gender]["M"][countAll].IntValue,
+                        result[genderAgeQuery][year][week][gender]["F"][countAll].IntValue
+                   );
+                }
+                Console.WriteLine();
             }
 
             Console.WriteLine("Finished, hit the anykey to exit");
