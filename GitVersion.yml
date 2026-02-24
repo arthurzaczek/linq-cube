@@ -1,4 +1,6 @@
 workflow: GitFlow/v1
 next-version: 8.0.0
 semantic-version-format: Loose
-
+branches:
+  main:
+    mode: ContinuousDeployment
