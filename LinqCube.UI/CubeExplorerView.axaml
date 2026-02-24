@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:dasz.LinqCube.UI"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
+             x:Class="dasz.LinqCube.UI.CubeExplorerView">
+
+    <Grid ColumnDefinitions="280,Auto,*">
+        <!-- Left Panel: Queries -->
+        <Border Grid.Column="0" Padding="8">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Cube Explorer"
+                           FontWeight="Bold" FontSize="16" Margin="0,0,0,8" />
+                <TreeView Name="QueryTreeView"
+                          SelectionChanged="OnQueryTreeSelectionChanged">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Title}" />
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </DockPanel>
+        </Border>
+
+        <!-- Splitter -->
+        <GridSplitter Grid.Column="1" Width="4" ResizeBehavior="PreviousAndNext" />
+
+        <!-- Right Panel: Data View -->
+        <Border Grid.Column="2" Padding="8">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Name="DataViewTitle" Text="Select a query to explore data"
+                           FontWeight="Bold" FontSize="16" Margin="0,0,0,8" />
+                <DataGrid Name="ResultDataGrid"
+                          AutoGenerateColumns="True"
+                          IsReadOnly="True"
+                          CanUserReorderColumns="True"
+                          CanUserResizeColumns="True"
+                          CanUserSortColumns="True"
+                          GridLinesVisibility="All"
+                          BorderThickness="1"
+                          BorderBrush="#ccc" />
+            </DockPanel>
+        </Border>
+    </Grid>
+
+</UserControl>
+

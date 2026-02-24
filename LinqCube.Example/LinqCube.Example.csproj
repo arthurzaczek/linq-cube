@@ -5,6 +5,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>dasz.LinqCube.Example</RootNamespace>
     <AssemblyName>LinqCube.Example</AssemblyName>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -24,12 +24,12 @@ namespace dasz.LinqCube.Example
                 .BuildWeeks()
                 .Build<DateTime, Person>();
 
-            var time_empstart = new Dimension<DateTime, Person>("Time employment start", k => k.EmploymentStart.Value, k => k.EmploymentStart.HasValue)
+            var time_empstart = new Dimension<DateTime, Person>("Time employment start", k => k.EmploymentStart!.Value, k => k.EmploymentStart.HasValue)
                     .BuildYearSlice(Repository.MIN_DATE.Year, Repository.CURRENT_YEAR, 1, null, 9, null) // only look at jan-sept
                     .BuildMonths()
                     .Build<DateTime, Person>();
 
-            var time_employment = new Dimension<DateTime, Person>("Time employment", k => k.EmploymentStart.Value, k => k.EmploymentEnd ?? DateTime.MaxValue, k => k.EmploymentStart.HasValue)
+            var time_employment = new Dimension<DateTime, Person>("Time employment", k => k.EmploymentStart!.Value, k => k.EmploymentEnd ?? DateTime.MaxValue, k => k.EmploymentStart.HasValue)
                     .BuildYear(Repository.MIN_DATE.Year, Repository.CURRENT_YEAR)
                     .Build<DateTime, Person>();
 

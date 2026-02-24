@@ -1,16 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>dasz.LinqCube.UI</RootNamespace>
+    <AssemblyName>LinqCube.UI</AssemblyName>
     <Authors>Arthur Zaczek</Authors>
     <Company>dasz.at e.U.</Company>
-    <Description>LinqCube is a small utility library to define measures and dimensions in code an do in-memory cubes against LINQ queries.</Description>
+    <Description>LinqCube UI is a small utility library to visualize LinqCubes.</Description>
     <Copyright>Copyright © 2026 dasz.at e.U.</Copyright>
     <PackageProjectUrl>https://github.com/arthurzaczek/linq-cube</PackageProjectUrl>
     <RepositoryUrl>https://github.com/arthurzaczek/linq-cube</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageTags>Linq Cube OLAP Library</PackageTags>
+    <PackageTags>Linq Cube OLAP UI Library</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
@@ -25,4 +27,17 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.2.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LinqCube\LinqCube.csproj" />
+  </ItemGroup>
+
 </Project>
+
+
