@@ -30,13 +30,18 @@ public partial class MainWindow : Window
         watch.Start();
 
         // Build dimensions (same as console example)
+        // Birthday range: MAX_DATE.AddYears(-18).AddDays(-rnd.Next(14600))
+        //   oldest = Jan 1 2027 - 18y - 14599d ≈ 1969, youngest = Jan 1 2027 - 18y = 2009
+        var birthdayStartYear = Repository.MAX_DATE.AddYears(-18).AddDays(-14599).Year;
+        var birthdayEndYear   = Repository.MAX_DATE.AddYears(-18).Year; // exclusive upper bound year
+
         var time = new Dimension<DateTime, Person>("Time", k => k.Birthday)
-            .BuildYear(1978, Repository.CURRENT_YEAR)
+            .BuildYear(birthdayStartYear, birthdayEndYear)
             .BuildMonths()
             .Build<DateTime, Person>();
 
         var time_weeks = new Dimension<DateTime, Person>("Time (Weeks)", k => k.Birthday)
-            .BuildYear(2019, Repository.CURRENT_YEAR)
+            .BuildYear(birthdayStartYear, birthdayEndYear)
             .BuildWeeks()
             .Build<DateTime, Person>();
 

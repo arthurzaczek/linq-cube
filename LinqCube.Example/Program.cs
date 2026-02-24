@@ -14,13 +14,18 @@ namespace dasz.LinqCube.Example
             Console.WriteLine("Testing Linq-Cube v{0}", typeof(Program).Assembly.GetName().Version);
 
             Console.WriteLine("Building dimensions");
+            // Birthday range: MAX_DATE.AddYears(-18).AddDays(-rnd.Next(14600))
+            //   oldest ≈ 1969, youngest = MAX_DATE - 18 years (2009)
+            var birthdayStartYear = Repository.MAX_DATE.AddYears(-18).AddDays(-14599).Year;
+            var birthdayEndYear   = Repository.MAX_DATE.AddYears(-18).Year; // exclusive upper bound year
+
             var time = new Dimension<DateTime, Person>("Time", k => k.Birthday)
-                    .BuildYear(1978, Repository.CURRENT_YEAR)
+                    .BuildYear(birthdayStartYear, birthdayEndYear)
                     .BuildMonths()
                     .Build<DateTime, Person>();
 
             var time_weeks = new Dimension<DateTime, Person>("Time", k => k.Birthday)
-                .BuildYear(1978, Repository.CURRENT_YEAR)
+                .BuildYear(birthdayStartYear, birthdayEndYear)
                 .BuildWeeks()
                 .Build<DateTime, Person>();
 
