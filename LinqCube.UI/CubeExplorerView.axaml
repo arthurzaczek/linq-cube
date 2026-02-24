@@ -3,45 +3,197 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:dasz.LinqCube.UI"
-             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
-             x:Class="dasz.LinqCube.UI.CubeExplorerView">
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
+             x:Class="dasz.LinqCube.UI.CubeExplorerView"
+             DragDrop.AllowDrop="True">
 
-    <Grid ColumnDefinitions="280,Auto,*">
-        <!-- Left Panel: Queries -->
-        <Border Grid.Column="0" Padding="8">
-            <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Text="Cube Explorer"
-                           FontWeight="Bold" FontSize="16" Margin="0,0,0,8" />
-                <TreeView Name="QueryTreeView"
-                          SelectionChanged="OnQueryTreeSelectionChanged">
-                    <TreeView.ItemTemplate>
-                        <TreeDataTemplate ItemsSource="{Binding Children}">
-                            <TextBlock Text="{Binding Title}" />
-                        </TreeDataTemplate>
-                    </TreeView.ItemTemplate>
-                </TreeView>
-            </DockPanel>
+    <Grid ColumnDefinitions="280,*">
+
+        <!-- ═══ Left: Query selector + Field layout designer ═══ -->
+        <Border Grid.Column="0" Background="#f8f8f8" BorderBrush="#ddd" BorderThickness="0,0,1,0" Padding="8">
+            <Grid RowDefinitions="Auto,*">
+
+                <!-- Query selector -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                    <TextBlock DockPanel.Dock="Top" Text="Queries" FontWeight="Bold" FontSize="13" Margin="0,0,0,4" />
+                    <ListBox Name="QueryListBox" MaxHeight="150" SelectionChanged="OnQuerySelectionChanged" />
+                </DockPanel>
+
+                <!-- Field layout designer: Available | Rows | Columns | Measures stacked vertically -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="6">
+
+                        <!-- Available fields -->
+                        <Border Name="AvailableDropZone"
+                                BorderBrush="#ccc" BorderThickness="1" CornerRadius="4" Padding="6"
+                                DragDrop.AllowDrop="True">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="📋 Available Fields" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,4" />
+                                <ListBox Name="AvailableFieldsList"
+                                         DragDrop.AllowDrop="True"
+                                         DoubleTapped="OnAvailableFieldDoubleTapped">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="4,2" Background="Transparent" Cursor="Hand">
+                                                <TextBlock Text="{Binding Label}" FontSize="12" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                    <ListBox.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add to Rows" Click="OnAddToRows" />
+                                            <MenuItem Header="Add to Columns" Click="OnAddToColumns" />
+                                            <MenuItem Header="Add to Values" Click="OnAddToValues" />
+                                        </ContextMenu>
+                                    </ListBox.ContextMenu>
+                                </ListBox>
+                            </DockPanel>
+                        </Border>
+
+                        <!-- Row dimensions zone -->
+                        <Border Name="RowDropZone"
+                                BorderBrush="#4a9eda" BorderThickness="2" CornerRadius="4" Padding="6"
+                                Background="#f0f7ff"
+                                DragDrop.AllowDrop="True">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="⬇ Row Dimensions" FontWeight="SemiBold" FontSize="12"
+                                           Foreground="#2a6ea8" Margin="0,0,0,4" />
+                                <ListBox Name="RowDimensionsList" DragDrop.AllowDrop="True"
+                                         DoubleTapped="OnRowDimensionDoubleTapped">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <DockPanel>
+                                                <Button DockPanel.Dock="Right" Content="✕" FontSize="10"
+                                                        Padding="4,1" Margin="4,0,0,0"
+                                                        Click="OnRemoveRowDimension"
+                                                        Tag="{Binding}" />
+                                                <Border Padding="4,2" Background="Transparent" Cursor="Hand"
+                                                        ToolTip.Tip="Double-click to expand/collapse hierarchy">
+                                                    <TextBlock Text="{Binding Label}" FontSize="12" VerticalAlignment="Center" />
+                                                </Border>
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                    <ListBox.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Expand Hierarchy" Click="OnExpandRowDimension" />
+                                            <MenuItem Header="Collapse Hierarchy" Click="OnCollapseRowDimension" />
+                                            <Separator />
+                                            <MenuItem Header="Move to Columns" Click="OnMoveRowToColumns" />
+                                            <MenuItem Header="Remove" Click="OnRemoveRowFromContext" />
+                                        </ContextMenu>
+                                    </ListBox.ContextMenu>
+                                </ListBox>
+                            </DockPanel>
+                        </Border>
+
+                        <!-- Column dimensions zone -->
+                        <Border Name="ColumnDropZone"
+                                BorderBrush="#5cb85c" BorderThickness="2" CornerRadius="4" Padding="6"
+                                Background="#f0fff0"
+                                DragDrop.AllowDrop="True">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="➡ Column Dimensions" FontWeight="SemiBold" FontSize="12"
+                                           Foreground="#3a8a3a" Margin="0,0,0,4" />
+                                <ListBox Name="ColumnDimensionsList" DragDrop.AllowDrop="True"
+                                         DoubleTapped="OnColumnDimensionDoubleTapped">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <DockPanel>
+                                                <Button DockPanel.Dock="Right" Content="✕" FontSize="10"
+                                                        Padding="4,1" Margin="4,0,0,0"
+                                                        Click="OnRemoveColumnDimension"
+                                                        Tag="{Binding}" />
+                                                <Border Padding="4,2" Background="Transparent" Cursor="Hand"
+                                                        ToolTip.Tip="Double-click to expand/collapse hierarchy">
+                                                    <TextBlock Text="{Binding Label}" FontSize="12" VerticalAlignment="Center" />
+                                                </Border>
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                    <ListBox.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Expand Hierarchy" Click="OnExpandColumnDimension" />
+                                            <MenuItem Header="Collapse Hierarchy" Click="OnCollapseColumnDimension" />
+                                            <Separator />
+                                            <MenuItem Header="Move to Rows" Click="OnMoveColumnToRows" />
+                                            <MenuItem Header="Remove" Click="OnRemoveColumnFromContext" />
+                                        </ContextMenu>
+                                    </ListBox.ContextMenu>
+                                </ListBox>
+                            </DockPanel>
+                        </Border>
+
+                        <!-- Measures zone -->
+                        <Border Name="MeasuresDropZone"
+                                BorderBrush="#d9534f" BorderThickness="2" CornerRadius="4" Padding="6"
+                                Background="#fff5f5"
+                                DragDrop.AllowDrop="True">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="∑ Values (Measures)" FontWeight="SemiBold" FontSize="12"
+                                           Foreground="#a94442" Margin="0,0,0,4" />
+                                <ListBox Name="MeasuresList" DragDrop.AllowDrop="True">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <DockPanel>
+                                                <Button DockPanel.Dock="Right" Content="✕" FontSize="10"
+                                                        Padding="4,1" Margin="4,0,0,0"
+                                                        Click="OnRemoveMeasure"
+                                                        Tag="{Binding}" />
+                                                <Border Padding="4,2" Background="Transparent" Cursor="Hand">
+                                                    <TextBlock Text="{Binding Label}" FontSize="12" VerticalAlignment="Center" />
+                                                </Border>
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                    <ListBox.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Remove" Click="OnRemoveMeasureFromContext" />
+                                        </ContextMenu>
+                                    </ListBox.ContextMenu>
+                                </ListBox>
+                            </DockPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
         </Border>
 
-        <!-- Splitter -->
-        <GridSplitter Grid.Column="1" Width="4" ResizeBehavior="PreviousAndNext" />
-
-        <!-- Right Panel: Data View -->
-        <Border Grid.Column="2" Padding="8">
+        <!-- ═══ Right: Pivot data grid ═══ -->
+        <Border Grid.Column="1" Padding="8">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Top" Name="DataViewTitle" Text="Select a query to explore data"
-                           FontWeight="Bold" FontSize="16" Margin="0,0,0,8" />
+                <TextBlock DockPanel.Dock="Top" Name="DataViewTitle" Text="Select a query, then drag dimensions to Rows / Columns"
+                           FontWeight="Bold" FontSize="14" Margin="0,0,0,8" />
                 <DataGrid Name="ResultDataGrid"
-                          AutoGenerateColumns="True"
+                          AutoGenerateColumns="False"
                           IsReadOnly="True"
                           CanUserReorderColumns="True"
                           CanUserResizeColumns="True"
-                          CanUserSortColumns="True"
+                          CanUserSortColumns="False"
                           GridLinesVisibility="All"
                           BorderThickness="1"
-                          BorderBrush="#ccc" />
+                          BorderBrush="#ccc"
+                          DoubleTapped="OnDataGridDoubleTapped" />
             </DockPanel>
         </Border>
+
+        <!-- ═══ Drag adorner overlay (spans entire grid, on top) ═══ -->
+        <Canvas Name="DragAdornerLayer" Grid.Column="0" Grid.ColumnSpan="2"
+                IsHitTestVisible="False" IsVisible="False">
+            <Border Name="DragAdornerBorder"
+                    Background="#e0eef8" BorderBrush="#4a9eda" BorderThickness="1"
+                    CornerRadius="3" Padding="8,4" Opacity="0.9"
+                    BoxShadow="2 2 6 0 #40000000">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Name="DragAdornerIcon" Text="≡" FontSize="12" Foreground="#888"
+                               VerticalAlignment="Center" />
+                    <TextBlock Name="DragAdornerText" Text="" FontSize="12" FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </Canvas>
+
     </Grid>
 
 </UserControl>

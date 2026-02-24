@@ -20,7 +20,7 @@ namespace dasz.LinqCube.Example
                     .Build<DateTime, Person>();
 
             var time_weeks = new Dimension<DateTime, Person>("Time", k => k.Birthday)
-                .BuildYear(2019, Repository.CURRENT_YEAR)
+                .BuildYear(1978, Repository.CURRENT_YEAR)
                 .BuildWeeks()
                 .Build<DateTime, Person>();
 
