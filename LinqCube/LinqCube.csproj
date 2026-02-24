@@ -5,16 +5,19 @@
     <Authors>Arthur Zaczek</Authors>
     <Company>dasz.at e.U.</Company>
     <Description>LinqCube is a small utility library to define measures and dimensions in code an do in-memory cubes against LINQ queries.</Description>
-    <Copyright>Copyright © 2019 dasz.at e.U.</Copyright>
+    <Copyright>Copyright © 2026 dasz.at e.U.</Copyright>
     <PackageProjectUrl>https://github.com/arthurzaczek/linq-cube</PackageProjectUrl>
     <RepositoryUrl>https://github.com/arthurzaczek/linq-cube</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.3.2.0</AssemblyVersion>
-    <FileVersion>1.3.2.0</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.3.2</Version>
-    <PackageReleaseNotes>Adding TimeSpan Measures, time dimension builder and some helper methods. Adding .net 4.0 Support</PackageReleaseNotes>
     <PackageTags>Linq Cube OLAP Library</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild" Version="6.6.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
 
 </Project>
