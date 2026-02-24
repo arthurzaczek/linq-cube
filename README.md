@@ -230,3 +230,8 @@ var allInOnceQuery = new Query<Person>("full cube")
 The size and depth of a dimension counts. As deeper as more cross applies (O(n!)). Double length, double cross applies (O(n)).
 
 Of course the amount of selected fact rows also counts. The count of measures does not count that much as they are relative cheap operations compared to cross applying a row to all dimensions. This will change when distinct sum/count measures are introduced.
+
+## License
+
+[LGPL](https://www.gnu.org/licenses/lgpl-3.0.html)
+

@@ -1,15 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube", "LinqCube\LinqCube.csproj", "{EC97DECA-69FA-4903-8C5D-798ADBD84D98}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube.Example", "LinqCube.Example\LinqCube.Example.csproj", "{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{E3EB6474-A02B-418D-9BFF-AFF306FD1368}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube", "LinqCube\LinqCube.csproj", "{04F4BDAB-E988-463B-8568-62FA0C3EA3A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube.UI", "LinqCube.UI\LinqCube.UI.csproj", "{B1A2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqCube.Example.UI", "LinqCube.Example.UI\LinqCube.Example.UI.csproj", "{A2B3C4D5-E6F7-8901-ABCD-EF2345678901}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{D53E1081-5FFB-4908-8E33-1E2509955BC2}"
 	ProjectSection(SolutionItems) = preProject
-		.nuget\nuget.exe = .nuget\nuget.exe
+		GitVersion.yml = GitVersion.yml
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
@@ -18,14 +23,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EC97DECA-69FA-4903-8C5D-798ADBD84D98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EC97DECA-69FA-4903-8C5D-798ADBD84D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EC97DECA-69FA-4903-8C5D-798ADBD84D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EC97DECA-69FA-4903-8C5D-798ADBD84D98}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A3B74C1-5897-4901-ACDD-2C4C2B0B2ACC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04F4BDAB-E988-463B-8568-62FA0C3EA3A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04F4BDAB-E988-463B-8568-62FA0C3EA3A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04F4BDAB-E988-463B-8568-62FA0C3EA3A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04F4BDAB-E988-463B-8568-62FA0C3EA3A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1A2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2B3C4D5-E6F7-8901-ABCD-EF2345678901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2B3C4D5-E6F7-8901-ABCD-EF2345678901}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2B3C4D5-E6F7-8901-ABCD-EF2345678901}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B3C4D5-E6F7-8901-ABCD-EF2345678901}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

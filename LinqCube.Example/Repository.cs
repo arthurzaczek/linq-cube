@@ -8,12 +8,12 @@ namespace dasz.LinqCube.Example
     public class Person
     {
         public int ID { get; set; }
-        public string Gender { get; set; }
+        public string Gender { get; set; } = string.Empty;
         public DateTime Birthday { get; set; }
         public DateTime? EmploymentStart { get; set; }
         public DateTime? EmploymentEnd { get; set; }
         public decimal Salary { get; set; }
-        public string Office { get; set; }
+        public string Office { get; set; } = string.Empty;
         public bool Active { get; set; }
     }
 
@@ -24,7 +24,7 @@ namespace dasz.LinqCube.Example
         public static readonly DateTime MAX_DATE = new DateTime(DateTime.Today.Year + 1, 1, 1);
         public static int CURRENT_YEAR { get { return MAX_DATE.Year - 1; } }
 
-        private static List<Person> _persons;
+        private static List<Person>? _persons;
         public static readonly string[] OFFICES = new[]
         {
             "New York",
@@ -43,7 +43,7 @@ namespace dasz.LinqCube.Example
                 {
                     CreateTestData();
                 }
-                return _persons.AsQueryable();
+                return _persons!.AsQueryable();
             }
         }
 

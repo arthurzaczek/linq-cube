@@ -5,12 +5,23 @@ using System.Text;
 
 namespace dasz.LinqCube
 {
+    /// <summary>
+    /// The result of a cube query
+    /// </summary>
     public class QueryResult : Dictionary<IDimension, IDimensionEntryResult>
     {
+        /// <summary>
+        /// creates a new query result
+        /// </summary>
         public QueryResult()
         {
         }
 
+        /// <summary>
+        /// Indexer for accessing a specific dimension
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public IDimensionEntryResult this[IDimensionEntry key]
         {
             get
@@ -20,30 +31,81 @@ namespace dasz.LinqCube
         }
     }
 
+    /// <summary>
+    /// Represents the result of a dimension entry with all sub dimensions and measures.
+    /// </summary>
     public interface IDimensionEntryResult
     {
+        /// <summary>
+        /// Returns the associated dimension entry
+        /// </summary>
         IDimensionEntry DimensionEntry { get; }
 
+        /// <summary>
+        /// Returns all measures
+        /// </summary>
         MeasureResultDictionary Values { get; }
+        /// <summary>
+        /// Access a measure result by measure
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         IMeasureResult this[IMeasure key] { get; }
 
+        /// <summary>
+        /// Returns the parent dimension entry result
+        /// </summary>
         IDimensionEntryResult ParentCoordinate { get; }
+        /// <summary>
+        /// 
+        /// </summary>
         IEnumerable<IDimensionEntryResult> CubeCoordinates { get; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         DimensionResultOtherDimensionsDictionary OtherDimensions { get; }
+        /// <summary>
+        /// Returns all children dimension entry results
+        /// </summary>
         DimensionResultEntriesDictionary Entries { get; }
 
+        /// <summary>
+        /// Return a dimension entry result by the given dimension entry
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         IDimensionEntryResult this[IDimensionEntry key] { get; }
+        /// <summary>
+        /// Return a dimension entry result by the given dimension entry
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         IDimensionEntryResult this[string key] { get; }
     }
 
+    /// <summary>
+    /// Represents the result of a dimension with all sub dimensions and measures.
+    /// </summary>
     public interface IDimensionResult : IDimensionEntryResult
     {
+        /// <summary>
+        /// Returns the associated dimension
+        /// </summary>
         IDimension Dimension { get; }
     }
 
+    /// <summary>
+    /// Implementation of a dimension entry result
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
     public class DimensionEntryResult<TFact> : IDimensionEntryResult
     {
+        /// <summary>
+        /// Creates a dimension entry result
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="measures"></param>
         public DimensionEntryResult(IDimensionEntry e, IEnumerable<IMeasure> measures)
         {
             DimensionEntry = e;
@@ -53,13 +115,37 @@ namespace dasz.LinqCube
             Values = new MeasureResultDictionary();
         }
 
+        /// <summary>
+        /// Returns the associated dimension
+        /// </summary>
         public IDimension Dimension { get { return this.DimensionEntry.Root; } }
+        /// <summary>
+        /// Returns the associated dimension entry
+        /// </summary>
         public IDimensionEntry DimensionEntry { get; private set; }
+        /// <summary>
+        /// Returns all children dimension entry results
+        /// </summary>
         public DimensionResultEntriesDictionary Entries { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public DimensionResultOtherDimensionsDictionary OtherDimensions { get; private set; }
+        /// <summary>
+        /// Returns all measure results
+        /// </summary>
         public MeasureResultDictionary Values { get; private set; }
+        /// <summary>
+        /// Returns all associated measures
+        /// </summary>
         public IEnumerable<IMeasure> Measures { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public IDimensionEntryResult ParentCoordinate { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public IEnumerable<IDimensionEntryResult> CubeCoordinates
         {
             get
@@ -73,6 +159,12 @@ namespace dasz.LinqCube
             }
         }
 
+        /// <summary>
+        /// Initialize the entry result
+        /// </summary>
+        /// <param name="chainedDimensions"></param>
+        /// <param name="crossingDimensions"></param>
+        /// <param name="parentCoordinate"></param>
         public void Initialize(IEnumerable<IQueryDimension> chainedDimensions, IEnumerable<IQueryDimension> crossingDimensions, IDimensionEntryResult parentCoordinate)
         {
             ParentCoordinate = parentCoordinate;
@@ -110,6 +202,11 @@ namespace dasz.LinqCube
             }
         }
 
+        /// <summary>
+        /// Return a dimension entry result by the given dimension entry
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public IDimensionEntryResult this[string key]
         {
             get
@@ -118,6 +215,11 @@ namespace dasz.LinqCube
             }
         }
 
+        /// <summary>
+        /// Return a dimension entry result by the given dimension entry
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public IDimensionEntryResult this[IDimensionEntry key]
         {
             get
@@ -153,6 +255,11 @@ namespace dasz.LinqCube
             }
         }
 
+        /// <summary>
+        /// Return a dimension entry result by the given measure entry
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public IMeasureResult this[IMeasure key]
         {
             get
@@ -162,14 +269,26 @@ namespace dasz.LinqCube
         }
     }
 
+    /// <summary>
+    /// Implementation of a dimension result
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
     public class DimensionResult<TFact> : DimensionEntryResult<TFact>, IDimensionResult
     {
+        /// <summary>
+        /// Creates a new dimension result
+        /// </summary>
+        /// <param name="dim"></param>
+        /// <param name="measures"></param>
         public DimensionResult(IQueryDimension dim, IEnumerable<IMeasure> measures)
             : base(dim.Dimension, measures)
         {
             QueryDimension = dim;
         }
 
+        /// <summary>
+        /// Returns the dimension associated to the query
+        /// </summary>
         public IQueryDimension QueryDimension { get; private set; }
     }
 
