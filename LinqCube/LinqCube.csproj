@@ -12,6 +12,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageTags>Linq Cube OLAP Library</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>LGPL</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
