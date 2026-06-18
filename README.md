@@ -231,6 +231,24 @@ The size and depth of a dimension counts. As deeper as more cross applies (O(n!)
 
 Of course the amount of selected fact rows also counts. The count of measures does not count that much as they are relative cheap operations compared to cross applying a row to all dimensions. This will change when distinct sum/count measures are introduced.
 
+## Sparse cubes (memory)
+
+By default a cube is **dense**: the full dimension cross-product is materialised up front (every coordinate exists, zero-filled), so the memory footprint grows with the *product* of the dimension cardinalities — even coordinates that never receive a fact are allocated. For large or high-cardinality cubes that product dominates memory, while most cells are empty.
+
+Pass `sparse: true` to build only the coordinates that actually receive a matching fact, so the footprint scales with the *data* rather than the cross-product:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C#
+// Dense (default, backwards-compatible) — every coordinate is allocated:
+result = Cube.Execute(source, genderAgeQuery, salaryQuery);
+
+// Sparse — only coordinates that actually occur are allocated:
+result = Cube.Execute(source, sparse: true, genderAgeQuery, salaryQuery);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sparse can reduce the node count by one to two orders of magnitude on sparse data (e.g. a `Customer × Team × Day` cube where each customer touches only a few teams on a few days). Additive measures and range slicing are unaffected — an empty coordinate contributes zero whether or not it is allocated.
+
+The one behavioural difference: **empty coordinates do not exist** in sparse mode. A consumer must therefore iterate the *domain* and treat a missing coordinate as zero, rather than rely on every cross-product cell being present (dense zero-fill). Iterating a result's `Entries`/`Leaves()` yields only the coordinates that occurred. Building is lazy — children and other-dimensions are materialised on first touch — which trades a little extra per-fact work for the smaller footprint.
+
 ## License
 
 [LGPL](https://www.gnu.org/licenses/lgpl-3.0.html)

@@ -62,7 +62,17 @@ namespace dasz.LinqCube
 
         internal void Initialize()
         {
+            Initialize(false);
+        }
+
+        internal void Initialize(bool sparse)
+        {
             Result = new QueryResult();
+
+            // Every query dimension (top, chained-sub and crossing) needs the sparse flag, since each one's
+            // Apply decides whether to materialise children/other-dimensions lazily.
+            foreach (var qDim in ChainedQueryDimensions) qDim.SetSparse(sparse);
+            foreach (var qDim in CrossingQueryDimensions) qDim.SetSparse(sparse);
 
             if (ChainedQueryDimensions.Count > 0)
             {
@@ -74,7 +84,7 @@ namespace dasz.LinqCube
 
                 var dimResult = new DimensionResult<TFact>(qDim, Measures);
                 ((IDictionary<IDimension, IDimensionEntryResult>)Result)[qDim.Dimension] = dimResult;
-                dimResult.Initialize(ChainedQueryDimensions.Skip(1), CrossingQueryDimensions, null);
+                dimResult.Initialize(ChainedQueryDimensions.Skip(1), CrossingQueryDimensions, null, sparse);
             }
             else
             {
@@ -87,7 +97,7 @@ namespace dasz.LinqCube
 
                     var dimResult = new DimensionResult<TFact>(qDim, Measures);
                     ((IDictionary<IDimension, IDimensionEntryResult>)Result)[qDim.Dimension] = dimResult;
-                    dimResult.Initialize(null, CrossingQueryDimensions.Where(i => i != qDim), null);
+                    dimResult.Initialize(null, CrossingQueryDimensions.Where(i => i != qDim), null, sparse);
                 }
             }
         }
@@ -99,6 +109,9 @@ namespace dasz.LinqCube
         IDimension Dimension { get; }
 
         void AddMeasures(List<IMeasure> measures);
+
+        /// <summary>Sets whether result nodes are materialised lazily (sparse) or eagerly (dense).</summary>
+        void SetSparse(bool sparse);
     }
 
     public class QueryDimension<TDimension, TFact> : IQueryDimension
@@ -107,6 +120,9 @@ namespace dasz.LinqCube
         public Dimension<TDimension, TFact> Dimension { get; private set; }
         IDimension IQueryDimension.Dimension { get { return Dimension; } }
         public List<IMeasure> Measures { get; private set; }
+
+        /// <summary>Whether result nodes are materialised lazily (sparse) or eagerly (dense).</summary>
+        public bool Sparse { get; private set; }
 
         public QueryDimension(Dimension<TDimension, TFact> dim)
         {
@@ -118,38 +134,81 @@ namespace dasz.LinqCube
             this.Measures = measures;
         }
 
+        public void SetSparse(bool sparse)
+        {
+            this.Sparse = sparse;
+        }
+
         public void Apply(object item, IDimensionEntryResult dimResult)
         {
             Apply((TFact)item, Dimension, dimResult);
         }
 
-        private void Apply(TFact item, DimensionEntry<TDimension> entry, IDimensionEntryResult result)
+        // Whether the fact matches this entry (dimension filter + the entry's range/value test).
+        private bool Matches(TFact item, DimensionEntry<TDimension> entry)
         {
-            var match = false;
-            if (Dimension.Filter == null || Dimension.Filter(item))
+            if (Dimension.Filter != null && !Dimension.Filter(item))
             {
-                if (Dimension.EndSelector == null)
-                {
-                    match = entry.InRange(Dimension.Selector(item));
-                }
-                else
-                {
-                    match = entry.InRange(Dimension.Selector(item), Dimension.EndSelector(item));
-                }
+                return false;
             }
 
-            if (match)
+            if (Dimension.EndSelector == null)
             {
-                // Do something
-                foreach (var kvp in result.Values)
+                return entry.InRange(Dimension.Selector(item));
+            }
+
+            return entry.InRange(Dimension.Selector(item), Dimension.EndSelector(item));
+        }
+
+        private void Apply(TFact item, DimensionEntry<TDimension> entry, IDimensionEntryResult result)
+        {
+            // Range/filter test for this entry, then apply. The root and the dense walk enter here; sparse
+            // children are pre-matched by their parent and call ApplyMatched directly, so a matched
+            // coordinate is range-checked exactly once on the hot path.
+            if (Matches(item, entry))
+            {
+                ApplyMatched(item, entry, result);
+            }
+        }
+
+        // Applies the fact at a coordinate already known to match, then recurses.
+        private void ApplyMatched(TFact item, DimensionEntry<TDimension> entry, IDimensionEntryResult result)
+        {
+            // Apply measures at this coordinate.
+            foreach (var kvp in result.Values)
+            {
+                kvp.Key.Apply(kvp.Value, result, item);
+            }
+
+            // Recurse into chained-next / crossing dimensions. In sparse mode they are materialised on the
+            // first matching fact (a node that exists has always had this called, so reads stay consistent).
+            if (Sparse)
+            {
+                ((DimensionEntryResult<TFact>)result).EnsureOtherDimensions();
+            }
+            foreach (var otherDim in result.OtherDimensions)
+            {
+                otherDim.Key.Apply(item, otherDim.Value);
+            }
+
+            // Recurse into the hierarchy children. Sparse mode only creates the children the fact matches
+            // (so empty coordinates never exist) and recurses into the already-matched child directly; dense
+            // mode walks the pre-built children (each re-tested at the top of Apply).
+            if (Sparse)
+            {
+                foreach (DimensionEntry<TDimension> child in entry.Children)
                 {
-                    kvp.Key.Apply(kvp.Value, result, item);
+                    if (!Matches(item, child))
+                    {
+                        continue;
+                    }
+
+                    var childResult = ((DimensionEntryResult<TFact>)result).GetOrCreateChild(child);
+                    ApplyMatched(item, child, childResult);
                 }
-                // All other
-                foreach (var otherDim in result.OtherDimensions)
-                {
-                    otherDim.Key.Apply(item, otherDim.Value);
-                }
+            }
+            else
+            {
                 foreach (DimensionEntry<TDimension> child in entry.Children)
                 {
                     Apply(item, child, result.Entries[child]);

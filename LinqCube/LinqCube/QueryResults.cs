@@ -159,47 +159,111 @@ namespace dasz.LinqCube
             }
         }
 
+        // The dimension context this node would expand into (the remaining chained dimensions + the
+        // crossing dimensions). Kept so a sparse node can build its children / other-dimensions lazily.
+        private IEnumerable<IQueryDimension> _chainedDimensions;
+        private IEnumerable<IQueryDimension> _crossingDimensions;
+        private bool _sparse;
+        private bool _otherDimensionsBuilt;
+
         /// <summary>
-        /// Initialize the entry result
+        /// Initialize the entry result (dense — backwards compatible).
+        /// </summary>
+        public void Initialize(IEnumerable<IQueryDimension> chainedDimensions, IEnumerable<IQueryDimension> crossingDimensions, IDimensionEntryResult parentCoordinate)
+        {
+            Initialize(chainedDimensions, crossingDimensions, parentCoordinate, false);
+        }
+
+        /// <summary>
+        /// Initialize the entry result.
         /// </summary>
         /// <param name="chainedDimensions"></param>
         /// <param name="crossingDimensions"></param>
         /// <param name="parentCoordinate"></param>
-        public void Initialize(IEnumerable<IQueryDimension> chainedDimensions, IEnumerable<IQueryDimension> crossingDimensions, IDimensionEntryResult parentCoordinate)
+        /// <param name="sparse">
+        /// When <see langword="false"/> the full child / other-dimension sub-tree is materialised eagerly
+        /// (every coordinate exists). When <see langword="true"/> only this node + its measure results are
+        /// created; children (<see cref="GetOrCreateChild"/>) and other-dimensions
+        /// (<see cref="EnsureOtherDimensions"/>) are materialised lazily as matching facts arrive.
+        /// </param>
+        public void Initialize(IEnumerable<IQueryDimension> chainedDimensions, IEnumerable<IQueryDimension> crossingDimensions, IDimensionEntryResult parentCoordinate, bool sparse)
         {
             ParentCoordinate = parentCoordinate;
-            foreach (var child in DimensionEntry.Children)
-            {
-                var result = new DimensionEntryResult<TFact>(child, Measures);
-                Entries[child] = result;
-                result.Initialize(chainedDimensions, crossingDimensions, parentCoordinate);
-            }
+            _chainedDimensions = chainedDimensions;
+            _crossingDimensions = crossingDimensions;
+            _sparse = sparse;
 
-            var nextDim = chainedDimensions == null ? null : chainedDimensions.FirstOrDefault();
-            if (nextDim != null)
+            if (!sparse)
             {
-                // we have a "next" chained dimension.
-                // Create result and recurse initialisation
-                var nextResult = new DimensionResult<TFact>(nextDim, Measures);
-                OtherDimensions[nextDim] = nextResult;
-                nextResult.Initialize(chainedDimensions.Skip(1), crossingDimensions, this);
-            }
-            else
-            {
-                // no chained dimensions left
-                // generate all crossing permutations
-                foreach (var other in crossingDimensions)
+                foreach (var child in DimensionEntry.Children)
                 {
-                    var otherResult = new DimensionResult<TFact>(other, Measures);
-                    OtherDimensions[other] = otherResult;
-                    otherResult.Initialize(null, crossingDimensions.Where(i => i != other), this);
+                    var result = new DimensionEntryResult<TFact>(child, Measures);
+                    Entries[child] = result;
+                    result.Initialize(chainedDimensions, crossingDimensions, parentCoordinate, sparse);
                 }
+
+                BuildOtherDimensions();
+                _otherDimensionsBuilt = true;
             }
 
             foreach (var measure in Measures)
             {
                 Values[measure] = measure.CreateResult();
             }
+        }
+
+        // Builds the chained-next / crossing other-dimension roots under this node (each recursing with the
+        // same sparse flag). Shared by the eager Initialize and the lazy EnsureOtherDimensions.
+        private void BuildOtherDimensions()
+        {
+            var nextDim = _chainedDimensions == null ? null : _chainedDimensions.FirstOrDefault();
+            if (nextDim != null)
+            {
+                // we have a "next" chained dimension.
+                var nextResult = new DimensionResult<TFact>(nextDim, Measures);
+                OtherDimensions[nextDim] = nextResult;
+                nextResult.Initialize(_chainedDimensions.Skip(1), _crossingDimensions, this, _sparse);
+            }
+            else if (_crossingDimensions != null)
+            {
+                // no chained dimensions left — generate all crossing permutations
+                foreach (var other in _crossingDimensions)
+                {
+                    var otherResult = new DimensionResult<TFact>(other, Measures);
+                    OtherDimensions[other] = otherResult;
+                    otherResult.Initialize(null, _crossingDimensions.Where(i => i != other), this, _sparse);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Lazily materialises this node's other-dimension roots (chained-next / crossing) on first touch.
+        /// A no-op in dense mode (already built) and after the first call. The cube executor calls this
+        /// before descending into <see cref="OtherDimensions"/> in sparse mode.
+        /// </summary>
+        public void EnsureOtherDimensions()
+        {
+            if (_otherDimensionsBuilt) return;
+            _otherDimensionsBuilt = true;
+            BuildOtherDimensions();
+        }
+
+        /// <summary>
+        /// Returns the child entry result for <paramref name="child"/>, creating it lazily (sparse mode) if
+        /// it does not exist yet. The new node shares this node's cross-dimension parent coordinate.
+        /// </summary>
+        public IDimensionEntryResult GetOrCreateChild(IDimensionEntry child)
+        {
+            IDimensionEntryResult existing;
+            if (Entries.TryGetValue(child, out existing))
+            {
+                return existing;
+            }
+
+            var result = new DimensionEntryResult<TFact>(child, Measures);
+            Entries[child] = result;
+            result.Initialize(_chainedDimensions, _crossingDimensions, ParentCoordinate, _sparse);
+            return result;
         }
 
         /// <summary>
