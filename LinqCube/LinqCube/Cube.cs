@@ -60,7 +60,49 @@ namespace dasz.LinqCube
                 result[query] = query.Result;
             }
 
+            FinalizeResults(result);
+
             return result;
+        }
+
+        // After the single ingestion pass, give every freezable measure result a one-time callback so it can
+        // release build-only scratch and compact its long-lived state (e.g. a distinct-count set becomes a
+        // packed array). A cheap O(nodes) walk run once per build; results that do not opt in — the additive
+        // built-ins — are simply skipped, so existing cubes are unaffected.
+        private static void FinalizeResults(CubeResult result)
+        {
+            foreach (var queryResult in result.Values)
+            {
+                foreach (var root in queryResult.Values)
+                {
+                    FinalizeNode(root);
+                }
+            }
+        }
+
+        // Visits a node and its whole sub-tree once. Hierarchy children live in Entries (e.g. year→month→day)
+        // and chained/crossing sub-dimensions in OtherDimensions; the two are disjoint, so no node is visited
+        // twice.
+        private static void FinalizeNode(IDimensionEntryResult node)
+        {
+            foreach (var measureResult in node.Values.Values)
+            {
+                var freezable = measureResult as IFreezableMeasureResult;
+                if (freezable != null)
+                {
+                    freezable.Freeze(node);
+                }
+            }
+
+            foreach (var other in node.OtherDimensions)
+            {
+                FinalizeNode(other.Value);
+            }
+
+            foreach (var child in node.Entries.Values)
+            {
+                FinalizeNode(child);
+            }
         }
     }
 
