@@ -135,6 +135,17 @@ If you just want to count rows, return a true.
 var countAll = new CountMeasure<Person>("Count", k => true);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+## Distinct count
+
+`DistinctCountMeasure<TFact, TKey>` counts the **distinct** keys among the facts at a node — e.g. distinct persons, not rows. Unlike the additive sum/count measures it is non-additive: the same key can occur under several leaves, so the distinct total over a slice is the *union* of the per-leaf key sets, not the sum of the per-leaf counts (which would over-count a key seen in two leaves). Each node therefore keeps the keys it saw — read the count via `IntValue`, or union `Keys` across coordinates for an exact distinct count over a custom slice.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ C#
+// distinct persons (TKey = int); default(TKey) — here 0 — is ignored as the "no key" sentinel
+var distinctPersons = new DistinctCountMeasure<Person, int>("Distinct persons", k => k.PersonId);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When the cube finishes building, each node's key set is frozen into a packed (and, where `TKey` is comparable, sorted) array via `IFreezableMeasureResult.Freeze`, which `Cube.Execute` calls once after the single ingestion pass. A cached result therefore keeps far less memory than a live hash set per node. Measures that don't implement the hook (the additive built-ins) are untouched.
+
 # Query
 When all definitions are done (dimensions and measures) you can define queries. A query is the link between your fact table, dimensions and measures.
 
@@ -229,7 +240,7 @@ var allInOnceQuery = new Query<Person>("full cube")
 
 The size and depth of a dimension counts. As deeper as more cross applies (O(n!)). Double length, double cross applies (O(n)).
 
-Of course the amount of selected fact rows also counts. The count of measures does not count that much as they are relative cheap operations compared to cross applying a row to all dimensions. This will change when distinct sum/count measures are introduced.
+Of course the amount of selected fact rows also counts. The count of measures does not count that much as they are relative cheap operations compared to cross applying a row to all dimensions. A `DistinctCountMeasure` is the exception: it retains a key set per node (see [Distinct count](#distinct-count) above), so it costs more memory than an additive measure.
 
 ## Sparse cubes (memory)
 
