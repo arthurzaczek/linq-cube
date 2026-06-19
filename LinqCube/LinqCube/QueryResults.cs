@@ -275,7 +275,18 @@ namespace dasz.LinqCube
         {
             get
             {
-                return Entries[key];
+                // Resolve by the dimension's defined child entries (the full domain), not only the
+                // materialised ones, so a valid-but-empty coordinate reads 0 in a sparse cube instead of
+                // throwing (the dense contract). Delegates to the IDimensionEntry indexer below.
+                foreach (var child in DimensionEntry.Children)
+                {
+                    if (child.Label == key)
+                    {
+                        return this[child];
+                    }
+                }
+
+                throw new ArgumentOutOfRangeException("key", string.Format("No child entry labelled '{0}'.", key));
             }
         }
 
@@ -288,35 +299,61 @@ namespace dasz.LinqCube
         {
             get
             {
-                IDimensionEntryResult result;
                 if (this.DimensionEntry == key)
                 {
                     return this;
                 }
-                else if (Entries.TryGetValue(key, out result))
+
+                IDimensionEntryResult result;
+                if (Entries.TryGetValue(key, out result))
                 {
                     return result;
                 }
-                else
+
+                if (key.Parent != null)
                 {
-                    if (key.Parent != null)
+                    // `key` is a descendant of this node. When we are its direct parent, it is a valid child
+                    // that simply was not materialised (sparse cube) — return a zero-valued node rather than
+                    // recursing onto ourselves (which would loop) or throwing. This restores the dense
+                    // contract: every valid coordinate is addressable and reads 0 when it received no facts.
+                    if (key.Parent == this.DimensionEntry)
                     {
-                        return this[key.Parent][key];
-                    }
-                    else
-                    {
-                        foreach (var dim in OtherDimensions)
-                        {
-                            if (dim.Key.Dimension == key.Root)
-                            {
-                                return dim.Value[key];
-                            }
-                        }
+                        return CreateEmptyChild(key);
                     }
 
-                    throw new ArgumentOutOfRangeException("key", "key does not match dimension");
+                    return this[key.Parent][key];
                 }
+
+                // `key` is a dimension root — it must be one of the chained / crossing other-dimensions.
+                EnsureOtherDimensions();
+                foreach (var dim in OtherDimensions)
+                {
+                    if (dim.Key.Dimension == key.Root)
+                    {
+                        return dim.Value[key];
+                    }
+                }
+
+                throw new ArgumentOutOfRangeException("key", "key does not match dimension");
             }
+        }
+
+        // Builds a transient, zero-valued result node for a valid child coordinate that was not materialised
+        // (sparse cube). Mirrors GetOrCreateChild but deliberately does NOT store the node in Entries: a built
+        // cube is cached and read concurrently, so a read-path indexer must not mutate shared state. The node
+        // carries fresh (zero) measure results and the same dimension context, so it reads 0 and is itself
+        // navigable — its own children resolve the same way.
+        private IDimensionEntryResult CreateEmptyChild(IDimensionEntry child)
+        {
+            var result = new DimensionEntryResult<TFact>(child, Measures);
+            result.Initialize(_chainedDimensions, _crossingDimensions, ParentCoordinate, _sparse);
+
+            // Populate the chained/crossing other-dimension roots so the node behaves like a dense empty
+            // node for BOTH access styles — the indexer (`node[innerDim]`) and a direct read of
+            // `OtherDimensions`. Their entries are themselves empty (built lazily), so everything still
+            // reads 0. The node is transient (never stored), so this mutation touches no shared state.
+            result.EnsureOtherDimensions();
+            return result;
         }
 
         /// <summary>
