@@ -53,11 +53,26 @@ Run from the repo root (`C:\Projects\!Libs\linq-cube`).
    git tag X.Y.Z
    git push origin master develop --tags
    ```
-5. **Pack from `master`** (the tag → clean version → `LinqCube.X.Y.Z.nupkg`):
+5. **Pack from `master` — CLEAN first, then VERIFY** (the tag → clean version → `LinqCube.X.Y.Z.nupkg`):
    ```
-   dotnet pack LinqCube/LinqCube.csproj -c Release -o ./artifacts
+   dotnet clean LinqCube/LinqCube.csproj -c Release                              # or: rm -rf LinqCube/bin LinqCube/obj
+   dotnet pack  LinqCube/LinqCube.csproj -c Release -o ./artifacts --no-incremental
+   # VERIFY the packed DLL is fresh AND carries your change (do NOT skip this):
+   unzip -p ./artifacts/LinqCube.X.Y.Z.nupkg lib/net10.0/LinqCube.dll > /tmp/lc.dll
+   grep -ac 'SomethingYouJustAdded' /tmp/lc.dll        # e.g. DoubleMaxMeasure — must print >= 1
    ```
    Confirm the file is `LinqCube.X.Y.Z.nupkg` (no `-alpha`/`+meta` suffix). The package id is **`LinqCube`**.
+
+   > ### ⚠️ GOTCHA — the stale-package trap (this has ALREADY shipped two broken releases)
+   > `dotnet pack` packages **whatever is already in `bin/Release`** — it does **not** reliably rebuild.
+   > If Release was last built before your change (very common: you built/tested only in **Debug**, or via a
+   > `ProjectReference` from a consumer that compiled Debug), pack silently ships the **OLD** DLL. The `.nupkg`
+   > carries the right *version number* but stale *code* — so consumers restore a package that's missing your
+   > API and fail to compile. **And nuget.org versions are immutable:** once a stale `X.Y.Z` is pushed, that
+   > number is BURNED — you can't re-upload it, you must unlist it and bump to the next patch.
+   >
+   > **Always:** `dotnet clean` (or delete `bin/`+`obj/`) **and** pass `--no-incremental`, **then** run the
+   > verify `grep` above (or at least check the DLL's timestamp is *now*) **before** `nuget push`.
 6. **Publish to nuget.org** (needs the maintainer's API key — this step is the maintainer's):
    ```
    dotnet nuget push ./artifacts/LinqCube.X.Y.Z.nupkg -s https://api.nuget.org/v3/index.json -k <APIKEY>
