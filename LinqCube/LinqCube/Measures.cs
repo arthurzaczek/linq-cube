@@ -444,4 +444,208 @@ namespace dasz.LinqCube
                 myResult.Set(v);
         }
     }
+
+    /// <summary>
+    /// Measure to min a double value across the rows at each dimension node (non-additive).
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
+    public class DoubleMinMeasure<TFact> : Measure<TFact, double>
+    {
+        /// <summary>Constructs a new measure from a fact selector.</summary>
+        public DoubleMinMeasure(string name, Func<TFact, double> selector)
+            : this(name, (fact, entry) => selector(fact))
+        {
+        }
+
+        /// <summary>Constructs a new measure from a fact + entry selector.</summary>
+        public DoubleMinMeasure(string name, Func<TFact, IDimensionEntryResult, double> selector)
+            : base(name, selector)
+        {
+        }
+
+        /// <summary>Creates the result seeded with <see cref="double.MaxValue"/> so the first value wins.</summary>
+        public override IMeasureResult CreateResult()
+        {
+            return new DoubleMeasureResult(this, double.MaxValue);
+        }
+
+        /// <summary>Keeps the smallest value seen at the node.</summary>
+        public override void Apply(IMeasureResult result, IDimensionEntryResult entry, object item)
+        {
+            var myResult = (DoubleMeasureResult)result;
+            var v = Selector((TFact)item, entry);
+            if (v < myResult.DoubleValue)
+                myResult.Set(v);
+        }
+    }
+
+    /// <summary>
+    /// Measure to max a double value across the rows at each dimension node (non-additive).
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
+    public class DoubleMaxMeasure<TFact> : Measure<TFact, double>
+    {
+        /// <summary>Constructs a new measure from a fact selector.</summary>
+        public DoubleMaxMeasure(string name, Func<TFact, double> selector)
+            : this(name, (fact, entry) => selector(fact))
+        {
+        }
+
+        /// <summary>Constructs a new measure from a fact + entry selector.</summary>
+        public DoubleMaxMeasure(string name, Func<TFact, IDimensionEntryResult, double> selector)
+            : base(name, selector)
+        {
+        }
+
+        /// <summary>Creates the result seeded with <see cref="double.MinValue"/> so the first value wins.</summary>
+        public override IMeasureResult CreateResult()
+        {
+            return new DoubleMeasureResult(this, double.MinValue);
+        }
+
+        /// <summary>Keeps the largest value seen at the node.</summary>
+        public override void Apply(IMeasureResult result, IDimensionEntryResult entry, object item)
+        {
+            var myResult = (DoubleMeasureResult)result;
+            var v = Selector((TFact)item, entry);
+            if (v > myResult.DoubleValue)
+                myResult.Set(v);
+        }
+    }
+
+    /// <summary>
+    /// Measure to min a decimal value across the rows at each dimension node (non-additive).
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
+    public class DecimalMinMeasure<TFact> : Measure<TFact, decimal>
+    {
+        /// <summary>Constructs a new measure from a fact selector.</summary>
+        public DecimalMinMeasure(string name, Func<TFact, decimal> selector)
+            : this(name, (fact, entry) => selector(fact))
+        {
+        }
+
+        /// <summary>Constructs a new measure from a fact + entry selector.</summary>
+        public DecimalMinMeasure(string name, Func<TFact, IDimensionEntryResult, decimal> selector)
+            : base(name, selector)
+        {
+        }
+
+        /// <summary>Creates the result seeded with <see cref="decimal.MaxValue"/> so the first value wins.</summary>
+        public override IMeasureResult CreateResult()
+        {
+            return new DecimalMeasureResult(this, decimal.MaxValue);
+        }
+
+        /// <summary>Keeps the smallest value seen at the node.</summary>
+        public override void Apply(IMeasureResult result, IDimensionEntryResult entry, object item)
+        {
+            var myResult = (DecimalMeasureResult)result;
+            var v = Selector((TFact)item, entry);
+            if (v < myResult.DecimalValue)
+                myResult.Set(v);
+        }
+    }
+
+    /// <summary>
+    /// Measure to max a decimal value across the rows at each dimension node (non-additive).
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
+    public class DecimalMaxMeasure<TFact> : Measure<TFact, decimal>
+    {
+        /// <summary>Constructs a new measure from a fact selector.</summary>
+        public DecimalMaxMeasure(string name, Func<TFact, decimal> selector)
+            : this(name, (fact, entry) => selector(fact))
+        {
+        }
+
+        /// <summary>Constructs a new measure from a fact + entry selector.</summary>
+        public DecimalMaxMeasure(string name, Func<TFact, IDimensionEntryResult, decimal> selector)
+            : base(name, selector)
+        {
+        }
+
+        /// <summary>Creates the result seeded with <see cref="decimal.MinValue"/> so the first value wins.</summary>
+        public override IMeasureResult CreateResult()
+        {
+            return new DecimalMeasureResult(this, decimal.MinValue);
+        }
+
+        /// <summary>Keeps the largest value seen at the node.</summary>
+        public override void Apply(IMeasureResult result, IDimensionEntryResult entry, object item)
+        {
+            var myResult = (DecimalMeasureResult)result;
+            var v = Selector((TFact)item, entry);
+            if (v > myResult.DecimalValue)
+                myResult.Set(v);
+        }
+    }
+
+    /// <summary>
+    /// Measure to min an int value across the rows at each dimension node (non-additive).
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
+    public class IntMinMeasure<TFact> : Measure<TFact, int>
+    {
+        /// <summary>Constructs a new measure from a fact selector.</summary>
+        public IntMinMeasure(string name, Func<TFact, int> selector)
+            : this(name, (fact, entry) => selector(fact))
+        {
+        }
+
+        /// <summary>Constructs a new measure from a fact + entry selector.</summary>
+        public IntMinMeasure(string name, Func<TFact, IDimensionEntryResult, int> selector)
+            : base(name, selector)
+        {
+        }
+
+        /// <summary>Creates the result seeded with <see cref="int.MaxValue"/> so the first value wins.</summary>
+        public override IMeasureResult CreateResult()
+        {
+            return new IntMeasureResult(this, int.MaxValue);
+        }
+
+        /// <summary>Keeps the smallest value seen at the node.</summary>
+        public override void Apply(IMeasureResult result, IDimensionEntryResult entry, object item)
+        {
+            var myResult = (IntMeasureResult)result;
+            var v = Selector((TFact)item, entry);
+            if (v < myResult.IntValue)
+                myResult.Set(v);
+        }
+    }
+
+    /// <summary>
+    /// Measure to max an int value across the rows at each dimension node (non-additive).
+    /// </summary>
+    /// <typeparam name="TFact"></typeparam>
+    public class IntMaxMeasure<TFact> : Measure<TFact, int>
+    {
+        /// <summary>Constructs a new measure from a fact selector.</summary>
+        public IntMaxMeasure(string name, Func<TFact, int> selector)
+            : this(name, (fact, entry) => selector(fact))
+        {
+        }
+
+        /// <summary>Constructs a new measure from a fact + entry selector.</summary>
+        public IntMaxMeasure(string name, Func<TFact, IDimensionEntryResult, int> selector)
+            : base(name, selector)
+        {
+        }
+
+        /// <summary>Creates the result seeded with <see cref="int.MinValue"/> so the first value wins.</summary>
+        public override IMeasureResult CreateResult()
+        {
+            return new IntMeasureResult(this, int.MinValue);
+        }
+
+        /// <summary>Keeps the largest value seen at the node.</summary>
+        public override void Apply(IMeasureResult result, IDimensionEntryResult entry, object item)
+        {
+            var myResult = (IntMeasureResult)result;
+            var v = Selector((TFact)item, entry);
+            if (v > myResult.IntValue)
+                myResult.Set(v);
+        }
+    }
 }
