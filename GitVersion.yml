@@ -1,5 +1,5 @@
 workflow: GitFlow/v1
-next-version: 10.2.1
+next-version: 10.2.2
 semantic-version-format: Loose
 branches:
   main:

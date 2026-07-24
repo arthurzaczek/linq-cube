@@ -55,13 +55,17 @@ Run from the repo root (`C:\Projects\!Libs\linq-cube`).
    ```
 5. **Pack from `master` — CLEAN first, then VERIFY** (the tag → clean version → `LinqCube.X.Y.Z.nupkg`):
    ```
-   dotnet clean LinqCube/LinqCube.csproj -c Release                              # or: rm -rf LinqCube/bin LinqCube/obj
-   dotnet pack  LinqCube/LinqCube.csproj -c Release -o ./artifacts --no-incremental
+   rm -rf LinqCube/bin LinqCube/obj                     # force a REAL rebuild (see the gotcha below)
+   dotnet build LinqCube/LinqCube.csproj -c Release     # GeneratePackageOnBuild=true → build BUILDS AND PACKS
+   cp LinqCube/bin/Release/LinqCube.X.Y.Z.nupkg ./artifacts/
    # VERIFY the packed DLL is fresh AND carries your change (do NOT skip this):
    unzip -p ./artifacts/LinqCube.X.Y.Z.nupkg lib/net10.0/LinqCube.dll > /tmp/lc.dll
    grep -ac 'SomethingYouJustAdded' /tmp/lc.dll        # e.g. DoubleMaxMeasure — must print >= 1
    ```
    Confirm the file is `LinqCube.X.Y.Z.nupkg` (no `-alpha`/`+meta` suffix). The package id is **`LinqCube`**.
+   Note: this project has `GeneratePackageOnBuild=true`, so **`dotnet build` produces the `.nupkg`** (in
+   `bin/Release`). Do **not** rely on `dotnet pack` — on a clean tree it fails (`NU5026`), and on a dirty one
+   it repackages stale binaries (the trap below). `--no-incremental` is a `build` switch, not a `pack` one.
 
    > ### ⚠️ GOTCHA — the stale-package trap (this has ALREADY shipped two broken releases)
    > `dotnet pack` packages **whatever is already in `bin/Release`** — it does **not** reliably rebuild.
@@ -71,8 +75,8 @@ Run from the repo root (`C:\Projects\!Libs\linq-cube`).
    > API and fail to compile. **And nuget.org versions are immutable:** once a stale `X.Y.Z` is pushed, that
    > number is BURNED — you can't re-upload it, you must unlist it and bump to the next patch.
    >
-   > **Always:** `dotnet clean` (or delete `bin/`+`obj/`) **and** pass `--no-incremental`, **then** run the
-   > verify `grep` above (or at least check the DLL's timestamp is *now*) **before** `nuget push`.
+   > **Always:** delete `bin/`+`obj/`, build with `dotnet build -c Release` (which packs here), **then** run
+   > the verify `grep` above (or at least check the packed DLL's timestamp is *now*) **before** `nuget push`.
 6. **Publish to nuget.org** (needs the maintainer's API key — this step is the maintainer's):
    ```
    dotnet nuget push ./artifacts/LinqCube.X.Y.Z.nupkg -s https://api.nuget.org/v3/index.json -k <APIKEY>
